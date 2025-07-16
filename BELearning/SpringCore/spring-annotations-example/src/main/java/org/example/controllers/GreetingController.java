@@ -10,7 +10,12 @@ public class GreetingController {
 
     private final IGreetingService greetingService;
 
-    // This constructor will prioritize the FrenchGreetingService, when both English and French services are available.
+    /**
+     * Constructs a GreetingController with the specified IGreetingService.
+     * This constructor will prioritize the FrenchGreetingService when multiple implementations are available.
+     *
+     * @param greetingService the IGreetingService implementation to use, prioritizing FrenchGreetingService in case of ambiguity
+     */
     @Autowired
     public GreetingController(@Qualifier("frenchGreetingService") IGreetingService greetingService){
         this.greetingService = greetingService;

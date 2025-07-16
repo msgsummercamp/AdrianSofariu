@@ -1,8 +1,8 @@
 package org.example.services;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component("englishGreetingService")
+@Service("englishGreetingService")
 public class EnglishGreetingService implements IGreetingService{
 
     @Override
