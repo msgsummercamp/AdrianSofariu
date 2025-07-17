@@ -1,23 +1,36 @@
 package com.example.userapi.unit.repository;
 
+import com.example.userapi.model.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.example.userapi.repository.UserRepository;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import java.util.List;
+
 
 
 public class UserRepositoryTest {
 
+    private UserRepository userRepository;
+
+    @BeforeEach
+    void setUp() {
+        userRepository = new UserRepository();
+    }
+
     @Test
     void findAll_returnsInitialUsers() {
-        UserRepository userRepository = new UserRepository();
-        assertFalse(userRepository.findAll().isEmpty());
+        List<User> initialUsers = userRepository.findAll();
+        assertThat(initialUsers, is(not(empty())));
     }
 
     @Test
     void getUsers_returnsLimitedUsers() {
-        UserRepository userRepository = new UserRepository();
         int count = 5;
-        assertFalse(userRepository.getUsers(count).isEmpty());
-        assertFalse(userRepository.getUsers(count).size() > count);
+        List<User> limitedUsers = userRepository.getUsers(count);
+        assertThat(limitedUsers, is(not(empty())));
+        assertThat(limitedUsers.size(), lessThanOrEqualTo(count));
     }
 }
