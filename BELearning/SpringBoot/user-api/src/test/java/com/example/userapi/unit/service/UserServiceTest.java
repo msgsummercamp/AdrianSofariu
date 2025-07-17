@@ -13,7 +13,10 @@ public class UserServiceTest {
     @Test
     void getAllUsers_returnsUsers() {
         IUserRepository repo = Mockito.mock(IUserRepository.class);
-        List<User> mockUsers = List.of(new User(1L, "Bob", "bob@example.com"));
+        // UserServiceTest.java
+        List<User> mockUsers = List.of(
+                new User(1L, "Bob", "bob@example.com", "password1", "BobFirst", "BobLast")
+        );
         Mockito.when(repo.findAll()).thenReturn(mockUsers);
 
         UserService userService = new UserService(repo);
@@ -26,8 +29,11 @@ public class UserServiceTest {
     @Test
     void getUsers_returnsLimitedUsers() {
         IUserRepository repo = Mockito.mock(IUserRepository.class);
-        List<User> mockUsers = List.of(new User(1L, "Bob", "bob@example.com"),
-                new User(2L, "Alice", "alice@example.com"));
+        // UserServiceTest.java
+        List<User> mockUsers = List.of(
+                new User(1L, "Bob", "bob@example.com", "password1", "BobFirst", "BobLast"),
+                new User(2L, "Alice", "alice@example.com", "password2", "AliceFirst", "AliceLast")
+        );
         Mockito.when(repo.getUsers(1)).thenReturn(mockUsers.subList(0, 1));
         Mockito.when(repo.getUsers(2)).thenReturn(mockUsers);
 

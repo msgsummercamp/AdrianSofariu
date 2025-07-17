@@ -20,8 +20,9 @@ public class UserRepository implements IUserRepository {
 
     private void initUserList() {
         logger.info("Initializing user list");
-        users.add(new User(1L, "Alice", "alice@example.com"));
-        users.add(new User(2L, "Bob", "bob@example.com"));
+        // UserRepository.java
+        users.add(new User(1L, "Alice", "alice@example.com", "password1", "AliceFirst", "AliceLast"));
+        users.add(new User(2L, "Bob", "bob@example.com", "password2", "BobFirst", "BobLast"));
         logger.debug("User list initialized with {} users", users.size());
     }
 
