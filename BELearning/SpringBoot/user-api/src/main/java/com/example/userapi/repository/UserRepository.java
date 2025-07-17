@@ -31,6 +31,9 @@ public class UserRepository implements IUserRepository {
         return users;
     }
 
-
-
+    @Override
+    public List<User> getUsers(int count) {
+        logger.info("Returning up to {} users", count);
+        return users.stream().limit(count).toList();
+    }
 }

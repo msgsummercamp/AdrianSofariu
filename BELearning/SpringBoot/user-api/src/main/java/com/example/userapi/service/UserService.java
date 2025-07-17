@@ -22,4 +22,10 @@ public class UserService implements IUserService {
         logger.info("Fetching all users from the repository");
         return userRepository.findAll();
     }
+
+    @Override
+    public List<User> getUsers(int count) {
+        logger.info("Fetching up to {} users from the repository", count);
+        return userRepository.getUsers(count);
+    }
 }
