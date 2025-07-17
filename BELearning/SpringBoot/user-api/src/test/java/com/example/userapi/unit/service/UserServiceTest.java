@@ -1,193 +1,252 @@
 package com.example.userapi.unit.service;
 
+import com.example.userapi.exception.ClashingUserException;
+import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
 import com.example.userapi.repository.UserRepository;
 import com.example.userapi.service.UserService;
+import org.hibernate.exception.ConstraintViolationException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.mockito.Mockito;
+import org.springframework.dao.DataIntegrityViolationException;
+
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 public class UserServiceTest {
+
+    private UserRepository userRepository;
+    private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        userRepository = Mockito.mock(UserRepository.class);
+        userService = new UserService(userRepository);
+    }
+
     @Test
     void getAllUsers_ReturnsListOfUsers() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        List<User> users = List.of(new User(), new User());
-        Mockito.when(userRepository.findAll()).thenReturn(users);
+        User user1 = new User();
+        user1.setUsername("user1");
+        User user2 = new User();
+        user2.setUsername("user2");
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(user1, user2));
 
-        List<User> result = userService.getAllUsers();
+        List<User> users = userService.getAllUsers();
 
-        assertEquals(2, result.size());
+        assertThat(users, hasSize(2));
+        assertThat(users, contains(user1, user2));
     }
 
     @Test
     void getUserById_UserExists_ReturnsUser() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
         User user = new User();
+        user.setId(1L);
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.getUserById(1L);
 
-        assertTrue(result.isPresent());
-        assertEquals(user, result.get());
+        assertThat(result.isPresent(), is(true));
+        assertThat(result.get(), is(user));
     }
 
     @Test
     void getUserById_UserDoesNotExist_ReturnsEmptyOptional() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        Mockito.when(userRepository.findById(2L)).thenReturn(Optional.empty());
 
-        Optional<User> result = userService.getUserById(1L);
+        Optional<User> result = userService.getUserById(2L);
 
-        assertEquals(Optional.empty(), result);
+        assertThat(result.isEmpty(), is(true));
     }
 
     @Test
     void getUserByUsername_UserExists_ReturnsUser() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
         User user = new User();
-        Mockito.when(userRepository.findByUsername("johndoe")).thenReturn(Optional.of(user));
+        user.setUsername("testuser");
+        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-        Optional<User> result = userService.getUserByUsername("johndoe");
+        Optional<User> result = userService.getUserByUsername("testuser");
 
-        assertTrue(result.isPresent());
-        assertEquals(user, result.get());
-    }
-
-    @Test
-    void getUserByUsername_UserDoesNotExist_ReturnsEmptyOptional() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        Mockito.when(userRepository.findByUsername("johndoe")).thenReturn(Optional.empty());
-
-        Optional<User> result = userService.getUserByUsername("johndoe");
-
-        assertEquals(Optional.empty(), result);
+        assertThat(result.isPresent(), is(true));
+        assertThat(result.get(), is(user));
     }
 
     @Test
     void getUserByEmail_UserExists_ReturnsUser() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
         User user = new User();
-        Mockito.when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(user));
+        user.setEmail("test@example.com");
+        Mockito.when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
-        Optional<User> result = userService.getUserByEmail("john.doe@example.com");
+        Optional<User> result = userService.getUserByEmail("test@example.com");
 
-        assertTrue(result.isPresent());
-        assertEquals(user, result.get());
+        assertThat(result.isPresent(), is(true));
+        assertThat(result.get(), is(user));
     }
 
     @Test
-    void getUserByEmail_UserDoesNotExist_ReturnsEmptyOptional() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        Mockito.when(userRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.empty());
+    void countUsers_ReturnsCorrectCount() {
+        Mockito.when(userRepository.countUsers()).thenReturn(5L);
 
-        Optional<User> result = userService.getUserByEmail("john.doe@example.com");
+        long count = userService.countUsers();
 
-        assertEquals(Optional.empty(), result);
+        assertThat(count, is(5L));
     }
 
     @Test
-    void addUser_ClashingUser_ThrowsClashingUserException() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
+    void addUser_ValidUser_ReturnsSavedUser() throws Exception {
         User user = new User();
-        user.setUsername("existing");
-        user.setEmail("existing@example.com");
-        User existingUser = new User();
-        existingUser.setId(2L);
-        Mockito.when(userRepository.findFirstByUsernameOrEmailAndIdNot("existing", "existing@example.com", -1L))
-                .thenReturn(Optional.of(existingUser));
+        user.setUsername("newuser");
+        user.setEmail("new@example.com");
+        user.setPassword("password");
+        Mockito.when(userRepository.save(user)).thenReturn(user);
 
-        org.junit.jupiter.api.Assertions.assertThrows(
-                com.example.userapi.exception.ClashingUserException.class,
+        User saved = userService.addUser(user);
+
+        assertThat(saved, is(user));
+    }
+
+    @Test
+    void addUser_UsernameAlreadyExists_ThrowsClashingUserException() {
+        User user = new User();
+        user.setUsername("existinguser");
+        user.setEmail("new@example.com");
+        user.setPassword("password");
+
+        SQLException sqlException = new SQLException("Unique violation on username", "23505");
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("",
+                new ConstraintViolationException(
+                        "Unique violation", sqlException, "users_username_key"
+                )
+        );
+        Mockito.when(userRepository.save(user)).thenThrow(exception);
+
+        Exception thrown = assertThrows(
+                ClashingUserException.class,
                 () -> userService.addUser(user)
         );
+        assertThat(thrown.getMessage(), containsString("Username"));
     }
 
     @Test
-    void addUser_NoClashingUser_SavesUser() throws Exception {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
+    void addUser_EmailAlreadyExists_ThrowsClashingUserException() {
         User user = new User();
-        user.setUsername("unique");
-        user.setEmail("unique@example.com");
-        Mockito.when(userRepository.findFirstByUsernameOrEmailAndIdNot("unique", "unique@example.com", -1L))
-                .thenReturn(Optional.empty());
-        Mockito.when(userRepository.save(user)).thenReturn(user);
+        user.setUsername("newuser");
+        user.setEmail("existing@example.com");
+        user.setPassword("password");
 
-        User result = userService.addUser(user);
-
-        assertEquals(user, result);
-    }
-
-    @Test
-    void updateUser_ClashingUser_ThrowsClashingUserException() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("clash");
-        user.setEmail("clash@example.com");
-        User clashingUser = new User();
-        clashingUser.setId(2L);
-        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        Mockito.when(userRepository.findFirstByUsernameOrEmailAndIdNot("clash", "clash@example.com", 1L))
-                .thenReturn(Optional.of(clashingUser));
-
-        org.junit.jupiter.api.Assertions.assertThrows(
-                com.example.userapi.exception.ClashingUserException.class,
-                () -> userService.updateUser(user)
+        SQLException sqlException = new SQLException("Unique violation on email", "23505");
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("",
+                new ConstraintViolationException(
+                        "Unique violation", sqlException, "users_email_key"
+                )
         );
+        Mockito.when(userRepository.save(user)).thenThrow(exception);
+
+        Exception thrown = assertThrows(
+                ClashingUserException.class,
+                () -> userService.addUser(user)
+        );
+        assertThat(thrown.getMessage(), containsString("Email"));
     }
 
     @Test
-    void updateUser_UserExistsAndNoClash_UpdatesUser() throws Exception {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
+    void addUser_NullPassword_ThrowsIllegalArgumentException() {
+        User user = new User();
+        user.setUsername("newuser");
+        user.setEmail("new@example.com");
+        user.setPassword(null);
+
+        SQLException sqlException = new SQLException("NOT NULL violation: password", "23502");
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("",
+                new ConstraintViolationException(
+                        "NOT NULL violation", sqlException, "password", "23502"
+                )
+        );
+        Mockito.when(userRepository.save(user)).thenThrow(exception);
+
+        Exception thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.addUser(user)
+        );
+        assertThat(thrown.getMessage(), containsString("Password cannot be null"));
+    }
+
+    @Test
+    void updateUser_UserExists_ValidUpdate_ReturnsUpdatedUser() throws Exception {
         User user = new User();
         user.setId(1L);
-        user.setUsername("updated");
+        user.setUsername("updateduser");
         user.setEmail("updated@example.com");
-        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        Mockito.when(userRepository.findFirstByUsernameOrEmailAndIdNot("updated", "updated@example.com", 1L))
-                .thenReturn(Optional.empty());
-        Mockito.when(userRepository.save(user)).thenReturn(user);
+        user.setPassword("newpass");
+        User dbUser = new User();
+        dbUser.setId(1L);
+        dbUser.setUsername("olduser");
+        dbUser.setEmail("old@example.com");
+        dbUser.setPassword("oldpass");
 
-        User result = userService.updateUser(user);
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
+        Mockito.when(userRepository.save(dbUser)).thenReturn(dbUser);
 
-        assertEquals(user, result);
+        User updated = userService.updateUser(user);
+
+        assertThat(updated.getUsername(), is("updateduser"));
+        assertThat(updated.getEmail(), is("updated@example.com"));
+        assertThat(updated.getPassword(), is("newpass"));
     }
 
     @Test
     void updateUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
         User user = new User();
         user.setId(99L);
+        user.setUsername("nouser");
+        user.setEmail("nouser@example.com");
+        user.setPassword("pass");
+
         Mockito.when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        org.junit.jupiter.api.Assertions.assertThrows(
-                com.example.userapi.exception.UserNotFoundException.class,
+        Exception thrown = assertThrows(
+                UserNotFoundException.class,
                 () -> userService.updateUser(user)
         );
+        assertThat(thrown.getMessage(), containsString("not found"));
+    }
+
+    @Test
+    void updateUser_UsernameClash_ThrowsClashingUserException() {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("clashuser");
+        user.setEmail("clash@example.com");
+        user.setPassword("pass");
+        User dbUser = new User();
+        dbUser.setId(1L);
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
+        SQLException sqlException = new SQLException("Unique violation on username", "23505");
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("",
+                new ConstraintViolationException(
+                        "Unique violation", sqlException, "users_username_key"
+                )
+        );
+        Mockito.when(userRepository.save(dbUser)).thenThrow(exception);
+
+        Exception thrown = assertThrows(
+                ClashingUserException.class,
+                () -> userService.updateUser(user)
+        );
+        assertThat(thrown.getMessage(), containsString("Username"));
     }
 
     @Test
     void deleteUser_UserExists_DeletesUser() throws Exception {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        User user = new User();
-        user.setId(1L);
-        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        Mockito.when(userRepository.existsById(1L)).thenReturn(true);
 
         userService.deleteUser(1L);
 
@@ -196,23 +255,12 @@ public class UserServiceTest {
 
     @Test
     void deleteUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        Mockito.when(userRepository.existsById(2L)).thenReturn(false);
 
-        org.junit.jupiter.api.Assertions.assertThrows(
-                com.example.userapi.exception.UserNotFoundException.class,
-                () -> userService.deleteUser(1L)
+        Exception thrown = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.deleteUser(2L)
         );
+        assertThat(thrown.getMessage(), containsString("not found"));
     }
-
-    @Test
-    void countUsers_ReturnsCorrectCount() {
-        UserRepository userRepository = Mockito.mock(UserRepository.class);
-        UserService userService = new UserService(userRepository);
-        Mockito.when(userRepository.countUsers()).thenReturn(5L);
-        long result = userService.countUsers();
-        assertEquals(5L, result);
-    }
-
 }

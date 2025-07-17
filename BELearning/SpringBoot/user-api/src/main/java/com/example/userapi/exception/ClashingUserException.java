@@ -4,4 +4,7 @@ public class ClashingUserException extends Exception {
     public ClashingUserException(String message) {
         super(message);
     }
+    public ClashingUserException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
