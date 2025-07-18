@@ -2,6 +2,7 @@ package com.example.userapi.service;
 
 import java.util.Optional;
 
+import com.example.userapi.dto.PatchUserDTO;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
@@ -65,6 +66,19 @@ public interface IUserService {
      * @throws UserNotFoundException if the user with the specified ID does not exist
      */
     User updateUser(User user) throws ClashingUserException, UserNotFoundException;
+
+    /**
+     * Patches an existing user in the repository.
+     * This method allows partial updates to a user.
+     * If the user does not exist or the username or email already exists for another user, it will throw an exception.
+     *
+     * @param id the ID of the user to patch
+     * @param patchUserDTO the DTO containing the fields to update
+     * @return the updated user entity
+     * @throws ClashingUserException if a user with the same username or email already exists
+     * @throws UserNotFoundException if the user with the specified ID does not exist
+     */
+    User patchUser(Long id, PatchUserDTO patchUserDTO) throws ClashingUserException, UserNotFoundException;
 
     /**
      * Deletes a user by their unique identifier.

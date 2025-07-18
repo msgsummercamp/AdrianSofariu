@@ -1,5 +1,6 @@
 package com.example.userapi.service;
 
+import com.example.userapi.dto.PatchUserDTO;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.repository.UserRepository;
 import org.slf4j.Logger;
@@ -71,6 +72,22 @@ public class UserService implements IUserService {
         userToUpdate.setLastname(user.getLastname());
 
         logger.info("Service - Attempting to update user with ID: {}", user.getId());
+        return userRepository.save(userToUpdate);
+    }
+
+    @Override
+    @Transactional
+    public User patchUser(Long id, PatchUserDTO patchUserDTO) throws UserNotFoundException {
+        User userToUpdate = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User with ID: " + id + " not found for patch."));
+
+        if (patchUserDTO.getUsername() != null) userToUpdate.setUsername(patchUserDTO.getUsername());
+        if (patchUserDTO.getEmail() != null) userToUpdate.setEmail(patchUserDTO.getEmail());
+        if (patchUserDTO.getPassword() != null) userToUpdate.setPassword(patchUserDTO.getPassword());
+        if (patchUserDTO.getFirstname() != null) userToUpdate.setFirstname(patchUserDTO.getFirstname());
+        if (patchUserDTO.getLastname() != null) userToUpdate.setLastname(patchUserDTO.getLastname());
+
+        logger.info("Service - Patching user with ID: {}", id);
         return userRepository.save(userToUpdate);
     }
 

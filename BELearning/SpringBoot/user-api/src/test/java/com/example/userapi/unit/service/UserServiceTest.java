@@ -1,5 +1,6 @@
 package com.example.userapi.unit.service;
 
+import com.example.userapi.dto.PatchUserDTO;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
 import com.example.userapi.repository.UserRepository;
@@ -130,7 +131,7 @@ public class UserServiceTest {
         dbUser.setPassword("oldpass");
 
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
-        Mockito.when(userRepository.save(dbUser)).thenReturn(dbUser);
+        Mockito.when(userRepository.save(dbUser)).thenReturn(user);
 
         User updated = userService.updateUser(user);
 
@@ -154,6 +155,74 @@ public class UserServiceTest {
                 () -> userService.updateUser(user)
         );
         assertThat(thrown.getMessage(), containsString("not found"));
+    }
+
+    @Test
+    void patchUser_UserExists_UpdatesProvidedFields() throws Exception {
+        User dbUser = new User();
+        dbUser.setId(1L);
+        dbUser.setUsername("olduser");
+        dbUser.setEmail("old@example.com");
+        dbUser.setPassword("oldpass");
+        dbUser.setFirstname("Old");
+        dbUser.setLastname("User");
+
+        PatchUserDTO patch = new PatchUserDTO();
+        patch.setUsername("newuser");
+        patch.setEmail(null); // not provided
+        patch.setPassword("newpass");
+        patch.setFirstname(null); // not provided
+        patch.setLastname("Newlastname");
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User result = userService.patchUser(1L, patch);
+
+        assertThat(result.getUsername(), is("newuser"));
+        assertThat(result.getEmail(), is("old@example.com")); // unchanged
+        assertThat(result.getPassword(), is("newpass"));
+        assertThat(result.getFirstname(), is("Old")); // unchanged
+        assertThat(result.getLastname(), is("Newlastname"));
+    }
+
+    @Test
+    void patchUser_UserDoesNotExist_ThrowsUserNotFoundException() {
+        PatchUserDTO patch = new PatchUserDTO();
+        patch.setUsername("newuser");
+
+        Mockito.when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        Exception thrown = assertThrows(
+                UserNotFoundException.class,
+                () -> userService.patchUser(99L, patch)
+        );
+        assertThat(thrown.getMessage(), containsString("not found"));
+    }
+
+    @Test
+    void patchUser_OnlyUsernameProvided_UpdatesOnlyUsername() throws Exception {
+        User dbUser = new User();
+        dbUser.setId(2L);
+        dbUser.setUsername("olduser");
+        dbUser.setEmail("old@example.com");
+        dbUser.setPassword("oldpass");
+        dbUser.setFirstname("Old");
+        dbUser.setLastname("User");
+
+        PatchUserDTO patch = new PatchUserDTO();
+        patch.setUsername("patcheduser");
+
+        Mockito.when(userRepository.findById(2L)).thenReturn(Optional.of(dbUser));
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        User result = userService.patchUser(2L, patch);
+
+        assertThat(result.getUsername(), is("patcheduser"));
+        assertThat(result.getEmail(), is("old@example.com"));
+        assertThat(result.getPassword(), is("oldpass"));
+        assertThat(result.getFirstname(), is("Old"));
+        assertThat(result.getLastname(), is("User"));
     }
 
     @Test

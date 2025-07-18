@@ -1,7 +1,11 @@
 package com.example.userapi.controller;
 
+import com.example.userapi.dto.PatchUserDTO;
+import com.example.userapi.dto.UserDTO;
 import com.example.userapi.model.User;
 import com.example.userapi.service.IUserService;
+import com.example.userapi.validators.EmailValidator;
+import com.example.userapi.validators.UserPatchValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -55,8 +58,10 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Unexpected error",
                     content = @Content(mediaType = "application/json"))
     })
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) throws Exception {
-        User createdUser = userService.addUser(user);
+    public ResponseEntity<User> createUser(@Valid @RequestBody UserDTO userRequest) throws Exception {
+        User newUser = new User(userRequest.getUsername(), userRequest.getEmail(), userRequest.getPassword(),
+                             userRequest.getFirstname(), userRequest.getLastname());
+        User createdUser = userService.addUser(newUser);
         return ResponseEntity.status(201).body(createdUser);
     }
 
@@ -79,9 +84,10 @@ public class UserController {
     public ResponseEntity<User> updateUser(
             @Parameter(description = "ID of the user to update", required = true)
             @PathVariable Long id,
-            @Valid @RequestBody User user) throws Exception {
-        user.setId(id);
-        User updatedUser = userService.updateUser(user);
+            @Valid @RequestBody UserDTO userRequest) throws Exception {
+        User userToUpdate = new User(id, userRequest.getUsername(), userRequest.getEmail(), userRequest.getPassword(),
+                userRequest.getFirstname(), userRequest.getLastname());
+        User updatedUser = userService.updateUser(userToUpdate);
         return ResponseEntity.ok(updatedUser);
     }
 
@@ -118,22 +124,11 @@ public class UserController {
     public ResponseEntity<User> patchUser(
             @Parameter(description = "ID of the user to patch", required = true)
             @PathVariable Long id,
-            @RequestBody Map<String, Object> updates) throws Exception {
-        Optional<User> optionalUser = userService.getUserById(id);
-        if (optionalUser.isEmpty()) {
-            throw new com.example.userapi.exception.UserNotFoundException("User not found");
-        }
-        User user = optionalUser.get();
-        updates.forEach((key, value) -> {
-            switch (key) {
-                case "username" -> user.setUsername((String) value);
-                case "email" -> user.setEmail((String) value);
-                case "password" -> user.setPassword((String) value);
-                case "firstname" -> user.setFirstname((String) value);
-                case "lastname" -> user.setLastname((String) value);
-            }
-        });
-        User updatedUser = userService.updateUser(user);
-        return ResponseEntity.ok(updatedUser);
+            @Valid @RequestBody PatchUserDTO patchUserDTO) throws Exception {
+
+        UserPatchValidator.validatePatch(patchUserDTO);
+
+        User patchedUser = userService.patchUser(id, patchUserDTO);
+        return ResponseEntity.ok(patchedUser);
     }
 }
