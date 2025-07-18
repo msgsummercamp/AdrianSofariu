@@ -73,7 +73,6 @@ public class UserService implements IUserService {
                 });
 
         // Copy relevant fields from the input 'user' to the 'userToUpdate' (fetched from DB)
-        // This prevents overwriting fields not provided in the input with nulls.
         userToUpdate.setUsername(user.getUsername());
         userToUpdate.setEmail(user.getEmail());
         userToUpdate.setPassword(user.getPassword());
