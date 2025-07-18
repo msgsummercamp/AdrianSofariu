@@ -10,8 +10,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import com.example.userapi.model.User;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,9 +26,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        logger.info("Service - Fetching all users from the repository");
-        return userRepository.findAll();
+    public Page<User> getUsers(Pageable pageable) {
+        logger.info("Service - Fetching all users with pagination: {}", pageable);
+        return userRepository.findAll(pageable);
     }
 
     @Override
@@ -73,7 +74,6 @@ public class UserService implements IUserService {
                 });
 
         // Copy relevant fields from the input 'user' to the 'userToUpdate' (fetched from DB)
-        // This prevents overwriting fields not provided in the input with nulls.
         userToUpdate.setUsername(user.getUsername());
         userToUpdate.setEmail(user.getEmail());
         userToUpdate.setPassword(user.getPassword());
@@ -159,7 +159,11 @@ public class UserService implements IUserService {
             // Fallback for any other ConstraintViolationException types not specifically handled
             throw new RuntimeException("A database constraint was violated: " + cve.getSQLException().getMessage(), e);
 
-        } else {
+        } else if (e.getCause() instanceof org.hibernate.PropertyValueException pve) {
+            String propertyName = pve.getPropertyName();
+            logger.error("Property value exception for property: {}", propertyName, e);
+            throw new IllegalArgumentException(pve.getMessage(), e);
+        }else {
             // If the cause is not a ConstraintViolationException (e.g., connection error, syntax error),
             // re-throw or wrap in a generic RuntimeException.
             throw new RuntimeException("An unexpected data integrity issue occurred: " + e.getMessage(), e);

@@ -18,6 +18,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 public class UserServiceTest {
@@ -32,17 +34,22 @@ public class UserServiceTest {
     }
 
     @Test
-    void getAllUsers_ReturnsListOfUsers() {
+    void getUsers_ReturnsPaginatedUsers() {
         User user1 = new User();
         user1.setUsername("user1");
         User user2 = new User();
         user2.setUsername("user2");
-        Mockito.when(userRepository.findAll()).thenReturn(List.of(user1, user2));
 
-        List<User> users = userService.getAllUsers();
+        Pageable pageable = Pageable.unpaged();
+        Page<User> userPage = new org.springframework.data.domain.PageImpl<>(List.of(user1, user2), pageable, 2);
 
-        assertThat(users, hasSize(2));
-        assertThat(users, contains(user1, user2));
+        Mockito.when(userRepository.findAll(pageable)).thenReturn(userPage);
+
+        Page<User> result = userService.getUsers(pageable);
+
+        assertThat(result.getContent(), hasSize(2));
+        assertThat(result.getContent(), contains(user1, user2));
+        assertThat(result.getTotalElements(), is(2L));
     }
 
     @Test

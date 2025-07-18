@@ -1,11 +1,12 @@
 package com.example.userapi.service;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service interface for managing {@link User} entities.
@@ -18,7 +19,7 @@ public interface IUserService {
      *
      * @return a list of all users
      */
-    List<User> getAllUsers();
+    Page<User> getUsers(Pageable pageable);
 
     /**
      * Retrieves a user by their unique identifier.
