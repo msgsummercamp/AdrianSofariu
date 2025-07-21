@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/users")
 @Tag(name = "User API", description = "Operations related to user management")
@@ -37,13 +39,18 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Page of users returned",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "204", description = "No users found",
+                    content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "500", description = "Unexpected error",
                     content = @Content(mediaType = "application/json"))
     })
-    public ResponseEntity<Page<UserResponseDTO>> getUsers(Pageable pageable) {
+    public ResponseEntity<List<UserResponseDTO>> getUsers(Pageable pageable) {
         Page<User> userPage = userService.getUsers(pageable);
         Page<UserResponseDTO> userResponseDTOPage = userPage.map(UserResponseMapper::toUserResponseDTO);
-        return ResponseEntity.ok(userResponseDTOPage);
+        if(userResponseDTOPage.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(userResponseDTOPage.getContent());
     }
 
     @PostMapping

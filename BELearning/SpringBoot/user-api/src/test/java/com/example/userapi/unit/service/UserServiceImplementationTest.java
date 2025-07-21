@@ -1,10 +1,11 @@
 package com.example.userapi.unit.service;
 
 import com.example.userapi.dto.PatchUserDTO;
+import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
 import com.example.userapi.repository.UserRepository;
-import com.example.userapi.service.UserService;
+import com.example.userapi.service.UserServiceImplementation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,15 +20,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 
-public class UserServiceTest {
+public class UserServiceImplementationTest {
 
     private UserRepository userRepository;
-    private UserService userService;
+    private UserServiceImplementation userService;
 
     @BeforeEach
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
-        userService = new UserService(userRepository);
+        userService = new UserServiceImplementation(userRepository);
     }
 
     @Test
@@ -104,7 +105,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void addUser_ValidUser_ReturnsSavedUser() {
+    void addUser_ValidUser_ReturnsSavedUser() throws ClashingUserException {
         User user = new User();
         user.setUsername("newuser");
         user.setEmail("new@example.com");
@@ -118,7 +119,7 @@ public class UserServiceTest {
 
 
     @Test
-    void updateUser_UserExists_ValidUpdate_ReturnsUpdatedUser() throws Exception {
+    void updateUser_UserExists_ValidUpdate_ReturnsUpdatedUser() throws ClashingUserException, UserNotFoundException {
         User user = new User();
         user.setId(1L);
         user.setUsername("updateduser");
@@ -158,7 +159,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void patchUser_UserExists_UpdatesProvidedFields() throws Exception {
+    void patchUser_UserExists_UpdatesProvidedFields() throws ClashingUserException, UserNotFoundException {
         User dbUser = new User();
         dbUser.setId(1L);
         dbUser.setUsername("olduser");
@@ -201,7 +202,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void patchUser_OnlyUsernameProvided_UpdatesOnlyUsername() throws Exception {
+    void patchUser_OnlyUsernameProvided_UpdatesOnlyUsername() throws  ClashingUserException, UserNotFoundException {
         User dbUser = new User();
         dbUser.setId(2L);
         dbUser.setUsername("olduser");
@@ -226,7 +227,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUser_UserExists_DeletesUser() throws Exception {
+    void deleteUser_UserExists_DeletesUser() throws UserNotFoundException {
         Mockito.when(userRepository.existsById(1L)).thenReturn(true);
 
         userService.deleteUser(1L);
