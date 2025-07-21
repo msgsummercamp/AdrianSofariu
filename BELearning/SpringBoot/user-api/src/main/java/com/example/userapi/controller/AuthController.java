@@ -1,18 +1,35 @@
 package com.example.userapi.controller;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
+import com.example.userapi.dto.UserDTO;
+import com.example.userapi.dto.auth.SignInRequest;
+import com.example.userapi.dto.auth.SignInResponse;
+import com.example.userapi.exception.ClashingUserException;
+import com.example.userapi.exception.UserNotFoundException;
+import com.example.userapi.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
-@Controller
-@Validated
+@RestController
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    @GetMapping("/login")
-    public String login() {
-        log.info("Accessing login page");
-        return "login"; // returns login.html from templates
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest) throws UserNotFoundException {
+        return ResponseEntity.ok(authService.signIn(signInRequest));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<SignInResponse> register(@Valid @RequestBody UserDTO userToRegister) throws ClashingUserException {
+        return ResponseEntity.ok(authService.register(userToRegister));
     }
 }
