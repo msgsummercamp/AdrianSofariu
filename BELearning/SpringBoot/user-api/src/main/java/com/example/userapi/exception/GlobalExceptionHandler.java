@@ -34,44 +34,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMsg);
     }
 
-    /**
-     * Handles DataIntegrityViolationException, specifically for unique constraint violations.
-     * @param e the DataIntegrityViolationException thrown by the service layer
-     * @return ResponseEntity with appropriate status and message
-     */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException e) {
         Throwable cause = e.getCause();
-        if (cause instanceof ConstraintViolationException cve) {
-            String constraintName = cve.getConstraintName();
-            String sqlState = cve.getSQLState();
-            String originalErrorMessage = cve.getSQLException().getMessage();
-
-            // Unique constraint violation
-            if ("23505".equals(sqlState)) {
-                if (constraintName != null) {
-                    if (constraintName.contains("username") || constraintName.contains("users_username_key")) {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists.");
-                    } else if (constraintName.contains("email") || constraintName.contains("users_email_key")) {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already registered.");
-                    }
-                }
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("A unique field constraint was violated.");
-            }
-
-            // Other constraint violations
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("A database constraint was violated: " + originalErrorMessage);
-        } else if (cause instanceof org.hibernate.PropertyValueException pve) {
-            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(pve.getMessage());
-        } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An unexpected data integrity issue occurred: " + e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(cause.getMessage());
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleOtherExceptions(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + ex.getMessage());
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<String> handleConstraintViolation(ConstraintViolationException e) {
+        String message = "Database constraint violation: " + e.getMessage();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(message);
     }
 }
