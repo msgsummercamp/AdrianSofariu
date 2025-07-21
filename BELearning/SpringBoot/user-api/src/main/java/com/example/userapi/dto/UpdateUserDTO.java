@@ -2,7 +2,11 @@ package com.example.userapi.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.Set;
 
 @Data
 public class UpdateUserDTO {
@@ -19,5 +23,8 @@ public class UpdateUserDTO {
 
     private String firstname;
     private String lastname;
-    private String role;
+
+    @NotNull(message = "Role is required")
+    @Size(min = 1, message = "At least one role is required")
+    private Set<String> roles;
 }

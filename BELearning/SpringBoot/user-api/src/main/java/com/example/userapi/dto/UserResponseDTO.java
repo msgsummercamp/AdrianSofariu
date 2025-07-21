@@ -1,6 +1,7 @@
 package com.example.userapi.dto;
 
 import lombok.Data;
+import java.util.Set;
 
 @Data
 public class UserResponseDTO {
@@ -11,5 +12,5 @@ public class UserResponseDTO {
     private String password;
     private String firstname;
     private String lastname;
-    private String role;
+    private Set<String> roles;
 }

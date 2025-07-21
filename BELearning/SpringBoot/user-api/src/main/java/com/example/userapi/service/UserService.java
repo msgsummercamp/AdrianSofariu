@@ -57,7 +57,7 @@ public interface UserService {
      * @param user the user to save
      * @return the saved user entity
      * @throws ClashingUserException if a user with the same username or email already exists
-     * @throws IllegalArgumentException if the username, email or password is null or empty
+     * @throws IllegalArgumentException if the username, email or password is null or empty or role is not valid
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
@@ -72,7 +72,7 @@ public interface UserService {
      * @return the updated user entity
      * @throws ClashingUserException if a user with the same username or email already exists
      * @throws UserNotFoundException if the user with the specified ID does not exist
-     * @throws IllegalArgumentException if the username, email or password is null or empty
+     * @throws IllegalArgumentException if the username, email or password is null or empty or role is not valid
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
@@ -87,6 +87,7 @@ public interface UserService {
      * @param patchUserDTO the DTO containing the fields to update
      * @return the updated user entity
      * @throws ClashingUserException if a user with the same username or email already exists
+     * @throws IllegalArgumentException if the role ID in the DTO does not exist
      * @throws UserNotFoundException if the user with the specified ID does not exist
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation

@@ -19,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImplementation implements UserService {
@@ -63,16 +65,17 @@ public class UserServiceImplementation implements UserService {
         User newUser = null;
         try {
 
-            String roleName = user.getRole();
-            Role userRole = roleRepository.findById(roleName)
-                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName));
+            Set<Role> userRoles = user.getRoles().stream()
+                    .map(roleName -> roleRepository.findById(roleName)
+                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
+                    .collect(Collectors.toSet());
             User userToAdd = User.builder()
                     .username(user.getUsername())
                     .email(user.getEmail())
                     .password(passwordEncoder.encode(user.getPassword()))
                     .firstname(user.getFirstname())
                     .lastname(user.getLastname())
-                    .role(userRole)
+                    .roles(userRoles)
                     .build();
             logger.info("Service - Attempting to save new user: {}", user.getUsername());
             newUser = userRepository.save(userToAdd);
@@ -86,9 +89,10 @@ public class UserServiceImplementation implements UserService {
     public User updateUser(UpdateUserDTO user, Long id) throws UserNotFoundException, ClashingUserException{
         User updatedUser = null;
         try {
-            String roleName = user.getRole();
-            Role userRole = roleRepository.findById(roleName)
-                    .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName));
+            Set<Role> userRoles = user.getRoles().stream()
+                    .map(roleName -> roleRepository.findById(roleName)
+                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
+                    .collect(Collectors.toSet());
             User updateReqUser = User.builder()
                     .id(id)
                     .username(user.getUsername())
@@ -96,7 +100,7 @@ public class UserServiceImplementation implements UserService {
                     .password(passwordEncoder.encode(user.getPassword()))
                     .firstname(user.getFirstname())
                     .lastname(user.getLastname())
-                    .role(userRole)
+                    .roles(userRoles)
                     .build();
             User userToUpdate = userRepository.findById(id)
                     .orElseThrow(() -> {
@@ -161,7 +165,7 @@ public class UserServiceImplementation implements UserService {
         target.setPassword(source.getPassword());
         target.setFirstname(source.getFirstname());
         target.setLastname(source.getLastname());
-        target.setRole(source.getRole());
+        target.setRoles(source.getRoles());
     }
 
     /**
@@ -180,10 +184,12 @@ public class UserServiceImplementation implements UserService {
         if (patchDTO.getPassword() != null) target.setPassword(passwordEncoder.encode(patchDTO.getPassword()));
         if (patchDTO.getFirstname() != null) target.setFirstname(patchDTO.getFirstname());
         if (patchDTO.getLastname() != null) target.setLastname(patchDTO.getLastname());
-        if (patchDTO.getRole() != null) {
-            Role userRole = roleRepository.findById(patchDTO.getRole())
-                    .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + patchDTO.getRole()));
-            target.setRole(userRole);
+        if (patchDTO.getRoles() != null) {
+            Set<Role> userRoles = patchDTO.getRoles().stream()
+                    .map(roleName -> roleRepository.findById(roleName)
+                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
+                    .collect(Collectors.toSet());
+            target.setRoles(userRoles);
         }
     }
 }

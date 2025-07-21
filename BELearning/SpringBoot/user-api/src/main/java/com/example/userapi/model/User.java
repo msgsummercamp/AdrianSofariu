@@ -1,8 +1,12 @@
 package com.example.userapi.model;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -31,8 +35,14 @@ public class User {
     private String firstname;
     private String lastname;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_name")
-    private Role role;
+    @JsonManagedReference
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_name", referencedColumnName = "name")
+    )
+    @NotNull(message = "Role is required")
+    private Set<Role> roles;
 
 }
