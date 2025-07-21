@@ -1,9 +1,13 @@
 package com.example.userapi.unit.service;
 
 import com.example.userapi.dto.PatchUserDTO;
+import com.example.userapi.dto.UserDTO;
+import com.example.userapi.dto.UpdateUserDTO;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
+import com.example.userapi.model.Role;
+import com.example.userapi.repository.RoleRepository;
 import com.example.userapi.repository.UserRepository;
 import com.example.userapi.service.UserServiceImplementation;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,17 +22,23 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 public class UserServiceImplementationTest {
 
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
     private UserServiceImplementation userService;
 
     @BeforeEach
     void setUp() {
         userRepository = Mockito.mock(UserRepository.class);
-        userService = new UserServiceImplementation(userRepository);
+        roleRepository = Mockito.mock(RoleRepository.class);
+        passwordEncoder = Mockito.mock(PasswordEncoder.class);
+        userService = new UserServiceImplementation(userRepository, roleRepository, passwordEncoder);
+        Mockito.when(passwordEncoder.encode(Mockito.anyString())).thenReturn("encodedPassword");
     }
 
     @Test
@@ -106,85 +116,158 @@ public class UserServiceImplementationTest {
 
     @Test
     void addUser_ValidUser_ReturnsSavedUser() throws ClashingUserException {
-        User user = new User();
-        user.setUsername("newuser");
-        user.setEmail("new@example.com");
-        user.setPassword("password");
-        Mockito.when(userRepository.save(user)).thenReturn(user);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("newuser");
+        userDTO.setEmail("new@example.com");
+        userDTO.setPassword("password");
+        userDTO.setRole("USER");
 
-        User saved = userService.addUser(user);
+        Role role = new Role();
+        role.setName("USER");
 
-        assertThat(saved, is(user));
+        User user = User.builder()
+                .username("newuser")
+                .email("new@example.com")
+                .password("password")
+                .role(role)
+                .build();
+
+        Mockito.when(roleRepository.findById("USER")).thenReturn(Optional.of(role));
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(user);
+
+        User saved = userService.addUser(userDTO);
+
+        assertThat(saved.getUsername(), is("newuser"));
+        assertThat(saved.getEmail(), is("new@example.com"));
+        assertThat(saved.getPassword(), is("password"));
+        assertThat(saved.getRole(), is(role));
+    }
+
+    @Test
+    void addUser_RoleNotFound_ThrowsException() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("newuser");
+        userDTO.setEmail("new@example.com");
+        userDTO.setPassword("password");
+        userDTO.setRole("NOT_EXIST");
+
+        Mockito.when(roleRepository.findById("NOT_EXIST")).thenReturn(Optional.empty());
+
+        Exception thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.addUser(userDTO)
+        );
+        assertThat(thrown.getMessage(), containsString("Role Not Found"));
     }
 
 
     @Test
     void updateUser_UserExists_ValidUpdate_ReturnsUpdatedUser() throws ClashingUserException, UserNotFoundException {
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("updateduser");
-        user.setEmail("updated@example.com");
-        user.setPassword("newpass");
-        User dbUser = new User();
-        dbUser.setId(1L);
-        dbUser.setUsername("olduser");
-        dbUser.setEmail("old@example.com");
-        dbUser.setPassword("oldpass");
+        UpdateUserDTO updateUserDTO = new UpdateUserDTO();
+        updateUserDTO.setUsername("updateduser");
+        updateUserDTO.setEmail("updated@example.com");
+        updateUserDTO.setPassword("newpass");
+        updateUserDTO.setRole("USER");
 
+        Role role = new Role();
+        role.setName("USER");
+
+        User dbUser = User.builder()
+                .id(1L)
+                .username("olduser")
+                .email("old@example.com")
+                .password("oldpass")
+                .role(role)
+                .build();
+
+        Mockito.when(roleRepository.findById("USER")).thenReturn(Optional.of(role));
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
-        Mockito.when(userRepository.save(dbUser)).thenReturn(user);
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        User updated = userService.updateUser(user);
+        User updated = userService.updateUser(updateUserDTO, 1L);
 
         assertThat(updated.getUsername(), is("updateduser"));
         assertThat(updated.getEmail(), is("updated@example.com"));
-        assertThat(updated.getPassword(), is("newpass"));
+        assertThat(updated.getPassword(), is("encodedPassword"));
+        assertThat(updated.getRole(), is(role));
     }
 
     @Test
     void updateUser_UserDoesNotExist_ThrowsUserNotFoundException() {
-        User user = new User();
-        user.setId(99L);
-        user.setUsername("nouser");
-        user.setEmail("nouser@example.com");
-        user.setPassword("pass");
+        UpdateUserDTO updateUserDTO = new UpdateUserDTO();
+        updateUserDTO.setUsername("nouser");
+        updateUserDTO.setEmail("nouser@example.com");
+        updateUserDTO.setPassword("pass");
+        updateUserDTO.setRole("USER");
 
+        Role role = new Role();
+        role.setName("USER");
+
+        Mockito.when(roleRepository.findById("USER")).thenReturn(Optional.of(role));
         Mockito.when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         Exception thrown = assertThrows(
                 UserNotFoundException.class,
-                () -> userService.updateUser(user)
+                () -> userService.updateUser(updateUserDTO, 99L)
         );
         assertThat(thrown.getMessage(), containsString("not found"));
     }
 
     @Test
+    void updateUser_RoleNotFound_ThrowsException() {
+        UpdateUserDTO updateUserDTO = new UpdateUserDTO();
+        updateUserDTO.setUsername("user");
+        updateUserDTO.setEmail("user@example.com");
+        updateUserDTO.setPassword("pass");
+        updateUserDTO.setRole("NOT_EXIST");
+
+        Mockito.when(roleRepository.findById("NOT_EXIST")).thenReturn(Optional.empty());
+
+        Exception thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.updateUser(updateUserDTO, 1L)
+        );
+        assertThat(thrown.getMessage(), containsString("Role Not Found"));
+    }
+
+
+    @Test
     void patchUser_UserExists_UpdatesProvidedFields() throws ClashingUserException, UserNotFoundException {
-        User dbUser = new User();
-        dbUser.setId(1L);
-        dbUser.setUsername("olduser");
-        dbUser.setEmail("old@example.com");
-        dbUser.setPassword("oldpass");
-        dbUser.setFirstname("Old");
-        dbUser.setLastname("User");
+        Role oldRole = new Role();
+        oldRole.setName("USER");
+        User dbUser = User.builder()
+                .id(1L)
+                .username("olduser")
+                .email("old@example.com")
+                .password("oldpass")
+                .firstname("Old")
+                .lastname("User")
+                .role(oldRole)
+                .build();
 
         PatchUserDTO patch = new PatchUserDTO();
         patch.setUsername("newuser");
-        patch.setEmail(null); // not provided
+        patch.setEmail("new@example.com");
         patch.setPassword("newpass");
-        patch.setFirstname(null); // not provided
-        patch.setLastname("Newlastname");
+        patch.setFirstname("NewFirst");
+        patch.setLastname("NewLast");
+        patch.setRole("ADMIN");
+
+        Role newRole = new Role();
+        newRole.setName("ADMIN");
 
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
+        Mockito.when(roleRepository.findById("ADMIN")).thenReturn(Optional.of(newRole));
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         User result = userService.patchUser(1L, patch);
 
         assertThat(result.getUsername(), is("newuser"));
-        assertThat(result.getEmail(), is("old@example.com")); // unchanged
-        assertThat(result.getPassword(), is("newpass"));
-        assertThat(result.getFirstname(), is("Old")); // unchanged
-        assertThat(result.getLastname(), is("Newlastname"));
+        assertThat(result.getEmail(), is("new@example.com"));
+        assertThat(result.getPassword(), is("encodedPassword"));
+        assertThat(result.getFirstname(), is("NewFirst"));
+        assertThat(result.getLastname(), is("NewLast"));
+        assertThat(result.getRole(), is(newRole));
     }
 
     @Test
@@ -202,14 +285,43 @@ public class UserServiceImplementationTest {
     }
 
     @Test
-    void patchUser_OnlyUsernameProvided_UpdatesOnlyUsername() throws  ClashingUserException, UserNotFoundException {
-        User dbUser = new User();
-        dbUser.setId(2L);
-        dbUser.setUsername("olduser");
-        dbUser.setEmail("old@example.com");
-        dbUser.setPassword("oldpass");
-        dbUser.setFirstname("Old");
-        dbUser.setLastname("User");
+    void patchUser_RoleNotFound_ThrowsException() {
+        Role oldRole = new Role();
+        oldRole.setName("USER");
+        User dbUser = User.builder()
+                .id(1L)
+                .username("olduser")
+                .email("old@example.com")
+                .password("oldpass")
+                .role(oldRole)
+                .build();
+
+        PatchUserDTO patch = new PatchUserDTO();
+        patch.setRole("NOT_EXIST");
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
+        Mockito.when(roleRepository.findById("NOT_EXIST")).thenReturn(Optional.empty());
+
+        Exception thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.patchUser(1L, patch)
+        );
+        assertThat(thrown.getMessage(), containsString("Role Not Found"));
+    }
+
+    @Test
+    void patchUser_OnlyUsernameProvided_UpdatesOnlyUsername() throws ClashingUserException, UserNotFoundException {
+        Role oldRole = new Role();
+        oldRole.setName("USER");
+        User dbUser = User.builder()
+                .id(2L)
+                .username("olduser")
+                .email("old@example.com")
+                .password("oldpass")
+                .firstname("Old")
+                .lastname("User")
+                .role(oldRole)
+                .build();
 
         PatchUserDTO patch = new PatchUserDTO();
         patch.setUsername("patcheduser");
@@ -224,6 +336,7 @@ public class UserServiceImplementationTest {
         assertThat(result.getPassword(), is("oldpass"));
         assertThat(result.getFirstname(), is("Old"));
         assertThat(result.getLastname(), is("User"));
+        assertThat(result.getRole(), is(oldRole));
     }
 
     @Test

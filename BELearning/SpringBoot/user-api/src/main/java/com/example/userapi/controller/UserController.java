@@ -1,9 +1,6 @@
 package com.example.userapi.controller;
 
-import com.example.userapi.dto.PatchUserDTO;
-import com.example.userapi.dto.UserDTO;
-import com.example.userapi.dto.UserResponseDTO;
-import com.example.userapi.dto.UserResponseMapper;
+import com.example.userapi.dto.*;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
@@ -17,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
@@ -24,7 +22,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @Tag(name = "User API", description = "Operations related to user management")
 public class UserController {
 
@@ -68,9 +66,7 @@ public class UserController {
                     content = @Content(mediaType = "application/json"))
     })
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserDTO userRequest) throws ClashingUserException  {
-        User newUser = new User(userRequest.getUsername(), userRequest.getEmail(), userRequest.getPassword(),
-                             userRequest.getFirstname(), userRequest.getLastname());
-        User createdUser = userService.addUser(newUser);
+        User createdUser = userService.addUser(userRequest);
         UserResponseDTO createdUserResponse = UserResponseMapper.toUserResponseDTO(createdUser);
         return ResponseEntity.status(201).body(createdUserResponse);
     }
@@ -94,14 +90,13 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> updateUser(
             @Parameter(description = "ID of the user to update", required = true)
             @PathVariable Long id,
-            @Valid @RequestBody UserDTO userRequest) throws ClashingUserException, UserNotFoundException {
-        User userToUpdate = new User(id, userRequest.getUsername(), userRequest.getEmail(), userRequest.getPassword(),
-                userRequest.getFirstname(), userRequest.getLastname());
-        User updatedUser = userService.updateUser(userToUpdate);
+            @Valid @RequestBody UpdateUserDTO userRequest) throws ClashingUserException, UserNotFoundException {
+        User updatedUser = userService.updateUser(userRequest, id);
         UserResponseDTO updatedUserResponse = UserResponseMapper.toUserResponseDTO(updatedUser);
         return ResponseEntity.ok(updatedUserResponse);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user", description = "Deletes a user by ID")
     @ApiResponses({

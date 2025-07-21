@@ -16,6 +16,7 @@ public class UserResponseMapper {
         userResponseDTO.setPassword(user.getPassword());
         userResponseDTO.setFirstname(user.getFirstname());
         userResponseDTO.setLastname(user.getLastname());
+        userResponseDTO.setRole(user.getRole().getName());
 
         return userResponseDTO;
     }

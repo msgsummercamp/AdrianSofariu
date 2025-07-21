@@ -3,6 +3,8 @@ package com.example.userapi.service;
 import java.util.Optional;
 
 import com.example.userapi.dto.PatchUserDTO;
+import com.example.userapi.dto.UpdateUserDTO;
+import com.example.userapi.dto.UserDTO;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
@@ -59,13 +61,14 @@ public interface UserService {
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
-    User addUser(User user) throws ClashingUserException;
+    User addUser(UserDTO user) throws ClashingUserException;
 
     /**
      * Updates an existing user in the repository.
      * If the user does not exist or the username or email already exists for another user, it will throw an exception.
      *
      * @param user the user to update
+     * @param id the user id
      * @return the updated user entity
      * @throws ClashingUserException if a user with the same username or email already exists
      * @throws UserNotFoundException if the user with the specified ID does not exist
@@ -73,7 +76,7 @@ public interface UserService {
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
-    User updateUser(User user) throws ClashingUserException, UserNotFoundException;
+    User updateUser(UpdateUserDTO user, Long id) throws ClashingUserException, UserNotFoundException;
 
     /**
      * Patches an existing user in the repository.

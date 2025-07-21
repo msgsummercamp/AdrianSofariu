@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,11 +31,8 @@ public class User {
     private String firstname;
     private String lastname;
 
-    public User(String username, String email, String password, String firstname, String lastname) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.firstname = firstname;
-        this.lastname = lastname;
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_name")
+    private Role role;
+
 }
