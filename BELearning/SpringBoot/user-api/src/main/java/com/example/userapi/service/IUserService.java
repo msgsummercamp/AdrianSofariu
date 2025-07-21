@@ -51,6 +51,9 @@ public interface IUserService {
      * @param user the user to save
      * @return the saved user entity
      * @throws ClashingUserException if a user with the same username or email already exists
+     * throws IllegalArgumentException if the user is null or has invalid data
+     * throws ConstraintViolationException if there is another constraint violation
+     * throws DataIntegrityViolationException if the cause is not a ConstraintViolationException
      */
     User addUser(User user) throws ClashingUserException;
 
@@ -62,6 +65,9 @@ public interface IUserService {
      * @return the updated user entity
      * @throws ClashingUserException if a user with the same username or email already exists
      * @throws UserNotFoundException if the user with the specified ID does not exist
+     * throws IllegalArgumentException if the user is null or has invalid data
+     * throws ConstraintViolationException if there is another constraint violation
+     * throws DataIntegrityViolationException if the cause is not a ConstraintViolationException
      */
     User updateUser(User user) throws ClashingUserException, UserNotFoundException;
 

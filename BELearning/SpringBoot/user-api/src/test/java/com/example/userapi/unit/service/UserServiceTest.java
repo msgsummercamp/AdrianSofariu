@@ -131,13 +131,14 @@ public class UserServiceTest {
                 ClashingUserException.class,
                 () -> userService.addUser(user)
         );
-        assertThat(thrown.getMessage(), containsString("Username"));
+        assertThat(thrown.getMessage(), containsString("A unique constraint was violated"));
+        assertThat(thrown.getMessage(), containsString("username"));
     }
 
     @Test
     void addUser_EmailAlreadyExists_ThrowsClashingUserException() {
         User user = new User();
-        user.setUsername("newuser");
+        user.setUsername("mycuh");
         user.setEmail("existing@example.com");
         user.setPassword("password");
 
@@ -153,7 +154,8 @@ public class UserServiceTest {
                 ClashingUserException.class,
                 () -> userService.addUser(user)
         );
-        assertThat(thrown.getMessage(), containsString("Email"));
+        assertThat(thrown.getMessage(), containsString("A unique constraint was violated"));
+        assertThat(thrown.getMessage(), containsString("email"));
     }
 
     @Test
@@ -175,7 +177,8 @@ public class UserServiceTest {
                 IllegalArgumentException.class,
                 () -> userService.addUser(user)
         );
-        assertThat(thrown.getMessage(), containsString("Password cannot be null"));
+        assertThat(thrown.getMessage(), containsString("A required field is missing and cannot be null"));
+        assertThat(thrown.getMessage(), containsString("password"));
     }
 
     @Test
@@ -219,6 +222,33 @@ public class UserServiceTest {
     }
 
     @Test
+    void updateUser_NullUsername_ThrowsIllegalArgumentException() {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername(null); // null username
+        user.setEmail("user@example.com");
+        user.setPassword("pass");
+        User dbUser = new User();
+        dbUser.setId(1L);
+
+        Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
+        SQLException sqlException = new SQLException("NOT NULL violation: username", "23502");
+        DataIntegrityViolationException exception = new DataIntegrityViolationException("",
+                new ConstraintViolationException(
+                        "NOT NULL violation", sqlException, "username", "23502"
+                )
+        );
+        Mockito.when(userRepository.save(dbUser)).thenThrow(exception);
+
+        Exception thrown = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.updateUser(user)
+        );
+        assertThat(thrown.getMessage(), containsString("A required field is missing and cannot be null"));
+        assertThat(thrown.getMessage(), containsString("username"));
+    }
+
+    @Test
     void updateUser_UsernameClash_ThrowsClashingUserException() {
         User user = new User();
         user.setId(1L);
@@ -241,7 +271,8 @@ public class UserServiceTest {
                 ClashingUserException.class,
                 () -> userService.updateUser(user)
         );
-        assertThat(thrown.getMessage(), containsString("Username"));
+        assertThat(thrown.getMessage(), containsString("A unique constraint was violated"));
+        assertThat(thrown.getMessage(), containsString("username"));
     }
 
     @Test
