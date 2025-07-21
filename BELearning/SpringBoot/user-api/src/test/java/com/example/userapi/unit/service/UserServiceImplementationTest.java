@@ -20,10 +20,10 @@ import org.mockito.Mockito;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 public class UserServiceImplementationTest {
 
@@ -43,10 +43,8 @@ public class UserServiceImplementationTest {
 
     @Test
     void getUsers_ReturnsPaginatedUsers() {
-        User user1 = new User();
-        user1.setUsername("user1");
-        User user2 = new User();
-        user2.setUsername("user2");
+        User user1 = User.builder().username("user1").roles(Set.of()).build();
+        User user2 = User.builder().username("user2").roles(Set.of()).build();
 
         Pageable pageable = Pageable.unpaged();
         Page<User> userPage = new org.springframework.data.domain.PageImpl<>(List.of(user1, user2), pageable, 2);
@@ -62,8 +60,7 @@ public class UserServiceImplementationTest {
 
     @Test
     void getUserById_UserExists_ReturnsUser() {
-        User user = new User();
-        user.setId(1L);
+        User user = User.builder().id(1L).roles(Set.of()).build();
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.getUserById(1L);
@@ -83,8 +80,7 @@ public class UserServiceImplementationTest {
 
     @Test
     void getUserByUsername_UserExists_ReturnsUser() {
-        User user = new User();
-        user.setUsername("testuser");
+        User user = User.builder().username("testuser").roles(Set.of()).build();
         Mockito.when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.getUserByUsername("testuser");
@@ -95,8 +91,7 @@ public class UserServiceImplementationTest {
 
     @Test
     void getUserByEmail_UserExists_ReturnsUser() {
-        User user = new User();
-        user.setEmail("test@example.com");
+        User user = User.builder().email("test@example.com").roles(Set.of()).build();
         Mockito.when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         Optional<User> result = userService.getUserByEmail("test@example.com");
@@ -120,7 +115,7 @@ public class UserServiceImplementationTest {
         userDTO.setUsername("newuser");
         userDTO.setEmail("new@example.com");
         userDTO.setPassword("password");
-        userDTO.setRole("USER");
+        userDTO.setRoles(Set.of("USER"));
 
         Role role = new Role();
         role.setName("USER");
@@ -128,8 +123,8 @@ public class UserServiceImplementationTest {
         User user = User.builder()
                 .username("newuser")
                 .email("new@example.com")
-                .password("password")
-                .role(role)
+                .password("encodedPassword")
+                .roles(Set.of(role))
                 .build();
 
         Mockito.when(roleRepository.findById("USER")).thenReturn(Optional.of(role));
@@ -139,8 +134,8 @@ public class UserServiceImplementationTest {
 
         assertThat(saved.getUsername(), is("newuser"));
         assertThat(saved.getEmail(), is("new@example.com"));
-        assertThat(saved.getPassword(), is("password"));
-        assertThat(saved.getRole(), is(role));
+        assertThat(saved.getPassword(), is("encodedPassword"));
+        assertThat(saved.getRoles(), contains(role));
     }
 
     @Test
@@ -149,7 +144,7 @@ public class UserServiceImplementationTest {
         userDTO.setUsername("newuser");
         userDTO.setEmail("new@example.com");
         userDTO.setPassword("password");
-        userDTO.setRole("NOT_EXIST");
+        userDTO.setRoles(Set.of("NOT_EXIST"));
 
         Mockito.when(roleRepository.findById("NOT_EXIST")).thenReturn(Optional.empty());
 
@@ -160,14 +155,13 @@ public class UserServiceImplementationTest {
         assertThat(thrown.getMessage(), containsString("Role Not Found"));
     }
 
-
     @Test
     void updateUser_UserExists_ValidUpdate_ReturnsUpdatedUser() throws ClashingUserException, UserNotFoundException {
         UpdateUserDTO updateUserDTO = new UpdateUserDTO();
         updateUserDTO.setUsername("updateduser");
         updateUserDTO.setEmail("updated@example.com");
         updateUserDTO.setPassword("newpass");
-        updateUserDTO.setRole("USER");
+        updateUserDTO.setRoles(Set.of("USER"));
 
         Role role = new Role();
         role.setName("USER");
@@ -177,7 +171,7 @@ public class UserServiceImplementationTest {
                 .username("olduser")
                 .email("old@example.com")
                 .password("oldpass")
-                .role(role)
+                .roles(Set.of(role))
                 .build();
 
         Mockito.when(roleRepository.findById("USER")).thenReturn(Optional.of(role));
@@ -189,7 +183,7 @@ public class UserServiceImplementationTest {
         assertThat(updated.getUsername(), is("updateduser"));
         assertThat(updated.getEmail(), is("updated@example.com"));
         assertThat(updated.getPassword(), is("encodedPassword"));
-        assertThat(updated.getRole(), is(role));
+        assertThat(updated.getRoles(), contains(role));
     }
 
     @Test
@@ -198,7 +192,7 @@ public class UserServiceImplementationTest {
         updateUserDTO.setUsername("nouser");
         updateUserDTO.setEmail("nouser@example.com");
         updateUserDTO.setPassword("pass");
-        updateUserDTO.setRole("USER");
+        updateUserDTO.setRoles(Set.of("USER"));
 
         Role role = new Role();
         role.setName("USER");
@@ -219,7 +213,7 @@ public class UserServiceImplementationTest {
         updateUserDTO.setUsername("user");
         updateUserDTO.setEmail("user@example.com");
         updateUserDTO.setPassword("pass");
-        updateUserDTO.setRole("NOT_EXIST");
+        updateUserDTO.setRoles(Set.of("NOT_EXIST"));
 
         Mockito.when(roleRepository.findById("NOT_EXIST")).thenReturn(Optional.empty());
 
@@ -229,7 +223,6 @@ public class UserServiceImplementationTest {
         );
         assertThat(thrown.getMessage(), containsString("Role Not Found"));
     }
-
 
     @Test
     void patchUser_UserExists_UpdatesProvidedFields() throws ClashingUserException, UserNotFoundException {
@@ -242,7 +235,7 @@ public class UserServiceImplementationTest {
                 .password("oldpass")
                 .firstname("Old")
                 .lastname("User")
-                .role(oldRole)
+                .roles(Set.of(oldRole))
                 .build();
 
         PatchUserDTO patch = new PatchUserDTO();
@@ -251,7 +244,7 @@ public class UserServiceImplementationTest {
         patch.setPassword("newpass");
         patch.setFirstname("NewFirst");
         patch.setLastname("NewLast");
-        patch.setRole("ADMIN");
+        patch.setRoles(Set.of("ADMIN"));
 
         Role newRole = new Role();
         newRole.setName("ADMIN");
@@ -267,7 +260,7 @@ public class UserServiceImplementationTest {
         assertThat(result.getPassword(), is("encodedPassword"));
         assertThat(result.getFirstname(), is("NewFirst"));
         assertThat(result.getLastname(), is("NewLast"));
-        assertThat(result.getRole(), is(newRole));
+        assertThat(result.getRoles(), contains(newRole));
     }
 
     @Test
@@ -293,11 +286,11 @@ public class UserServiceImplementationTest {
                 .username("olduser")
                 .email("old@example.com")
                 .password("oldpass")
-                .role(oldRole)
+                .roles(Set.of(oldRole))
                 .build();
 
         PatchUserDTO patch = new PatchUserDTO();
-        patch.setRole("NOT_EXIST");
+        patch.setRoles(Set.of("NOT_EXIST"));
 
         Mockito.when(userRepository.findById(1L)).thenReturn(Optional.of(dbUser));
         Mockito.when(roleRepository.findById("NOT_EXIST")).thenReturn(Optional.empty());
@@ -320,7 +313,7 @@ public class UserServiceImplementationTest {
                 .password("oldpass")
                 .firstname("Old")
                 .lastname("User")
-                .role(oldRole)
+                .roles(Set.of(oldRole))
                 .build();
 
         PatchUserDTO patch = new PatchUserDTO();
@@ -336,7 +329,7 @@ public class UserServiceImplementationTest {
         assertThat(result.getPassword(), is("oldpass"));
         assertThat(result.getFirstname(), is("Old"));
         assertThat(result.getLastname(), is("User"));
-        assertThat(result.getRole(), is(oldRole));
+        assertThat(result.getRoles(), contains(oldRole));
     }
 
     @Test
