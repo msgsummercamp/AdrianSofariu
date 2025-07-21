@@ -12,4 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u")
     long countUsers();
+
 }

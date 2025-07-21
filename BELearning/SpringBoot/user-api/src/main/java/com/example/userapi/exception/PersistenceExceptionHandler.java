@@ -12,7 +12,6 @@ public class PersistenceExceptionHandler {
     private static final String NOT_NULL_VIOLATION_SQL_STATE = "23502";
     private static final String UNIQUE_VIOLATION_SQL_STATE = "23505";
 
-
     /**
      * Function that handles DataIntegrityViolationException and its cause ConstraintViolationException.
      * It checks the SQL state of the ConstraintViolationException to determine if it is a unique constraint violation or a not-null constraint violation.
@@ -23,8 +22,10 @@ public class PersistenceExceptionHandler {
      * @throws ConstraintViolationException if the SQL state is not recognized
      * @throws DataIntegrityViolationException if the cause is not a ConstraintViolationException
      */
-    public static void handleConstraintViolationExceptions(DataIntegrityViolationException dataIntegrityViolationException) throws ClashingUserException, IllegalArgumentException, ConstraintViolationException, DataIntegrityViolationException {
+    public static void handleConstraintViolationExceptions(DataIntegrityViolationException dataIntegrityViolationException) throws ClashingUserException {
+
         if (dataIntegrityViolationException.getCause() instanceof ConstraintViolationException constraintViolationException) {
+
             String constraintName = constraintViolationException.getConstraintName();
             String sqlState = constraintViolationException.getSQLState();
             SQLException sqlException = constraintViolationException.getSQLException();
@@ -34,22 +35,39 @@ public class PersistenceExceptionHandler {
 
             if (sqlState.equals(UNIQUE_VIOLATION_SQL_STATE)) {
 
-                String originalErrorMessage = sqlException.getMessage();
-                String finalMessage = "A unique constraint was violated. " + originalErrorMessage;
-                throw new ClashingUserException(finalMessage, constraintViolationException);
+                handleUniqueConstraintViolation(sqlException);
             }
             else if (sqlState.equals(NOT_NULL_VIOLATION_SQL_STATE)) {
-                String originalErrorMessage = sqlException.getMessage();
-                String finalMessage = "A required field is missing and cannot be null. " + originalErrorMessage;
-                throw new IllegalArgumentException(finalMessage, constraintViolationException);
+
+                handleNotNullConstraintViolation(sqlException);
             }
 
-            // If the SQL state is not recognized, re-throw the original exception
             throw constraintViolationException;
 
         } else {
-            // If the cause is not a ConstraintViolationException, re-throw
             throw dataIntegrityViolationException;
         }
+    }
+
+    /**
+     * Handles unique constraint violations by throwing a ClashingUserException.
+     *
+     * @param e the SQLException that caused the unique constraint violation
+     * @throws ClashingUserException with a message indicating the violation
+     */
+    private static void handleUniqueConstraintViolation(SQLException e) throws ClashingUserException {
+        String message = "A unique constraint was violated: " + e.getMessage();
+        throw new ClashingUserException(message, e);
+    }
+
+    /**
+     * Handles not-null constraint violations by throwing an IllegalArgumentException.
+     *
+     * @param e the SQLException that caused the not-null constraint violation
+     * @throws IllegalArgumentException with a message indicating the violation
+     */
+    private static void handleNotNullConstraintViolation(SQLException e) throws IllegalArgumentException {
+        String message = "A required field cannot be null: " + e.getMessage();
+        throw new IllegalArgumentException(message, e);
     }
 }

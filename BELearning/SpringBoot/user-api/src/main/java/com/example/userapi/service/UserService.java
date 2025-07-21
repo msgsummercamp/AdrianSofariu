@@ -1,110 +1,108 @@
 package com.example.userapi.service;
 
-import com.example.userapi.exception.ClashingUserException;
-import com.example.userapi.exception.PersistenceExceptionHandler;
-import com.example.userapi.exception.UserNotFoundException;
-import com.example.userapi.repository.UserRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import com.example.userapi.model.User;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 import java.util.Optional;
 
-@Service
-@Slf4j
-public class UserService implements IUserService {
+import com.example.userapi.dto.PatchUserDTO;
+import com.example.userapi.exception.ClashingUserException;
+import com.example.userapi.exception.UserNotFoundException;
+import com.example.userapi.model.User;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-    private final UserRepository userRepository;
+/**
+ * Service interface for managing {@link User} entities.
+ * Provides methods for CRUD operations and user retrieval.
+ */
+public interface UserService {
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    /**
+     * Retrieves all users from the repository.
+     *
+     * @return a list of all users
+     */
+    Page<User> getUsers(Pageable pageable);
 
-    @Override
-    public List<User> getAllUsers() {
-        log.info("Service - Fetching all users from the repository");
-        return userRepository.findAll();
-    }
+    /**
+     * Retrieves a user by their unique identifier.
+     *
+     * @param id the ID of the user
+     * @return an {@code Optional} containing the user if found, or empty if not
+     */
+    Optional<User> getUserById(Long id);
 
-    @Override
-    public Optional<User> getUserById(Long id) {
-        log.info("Service - Fetching user with ID: {}", id);
-        return userRepository.findById(id);
-    }
+    /**
+     * Retrieves a user by their username.
+     *
+     * @param username the username of the user
+     * @return an {@code Optional} containing the user if found, or empty if not
+     */
+    Optional<User> getUserByUsername(String username);
 
-    @Override
-    public Optional<User> getUserByUsername(String username) {
-        log.info("Service - Fetching user with username: {}", username);
-        return userRepository.findByUsername(username);
-    }
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email the email of the user
+     * @return an {@code Optional} containing the user if found, or empty if not
+     */
+    Optional<User> getUserByEmail(String email);
 
-    @Override
-    public Optional<User> getUserByEmail(String email) {
-        log.info("Service - Fetching user with email: {}", email);
-        return userRepository.findByEmail(email);
-    }
+    /**
+     * Add a user to the repository.
+     * If there is an existing user with the same username or email, it will throw an exception.
+     *
+     * @param user the user to save
+     * @return the saved user entity
+     * @throws ClashingUserException if a user with the same username or email already exists
+     * @throws IllegalArgumentException if the username, email or password is null or empty
+     * @throws ConstraintViolationException if there are other constraint violations
+     * @throws DataIntegrityViolationException if there is an unknown data integrity violation
+     */
+    User addUser(User user) throws ClashingUserException;
 
-    @Override
-    @Transactional
-    public User addUser(User user) throws ClashingUserException, IllegalArgumentException, DataIntegrityViolationException, ConstraintViolationException {
-        User addedUser = null;
-        log.info("Service - Attempting to save new user: {}", user.getUsername());
-        try {
-            addedUser = userRepository.save(user);
-        } catch (DataIntegrityViolationException e) {
-            // Centralized handling for unique and possibly non-null violations
-            PersistenceExceptionHandler.handleConstraintViolationExceptions(e);
-        }
-        return addedUser;
-    }
+    /**
+     * Updates an existing user in the repository.
+     * If the user does not exist or the username or email already exists for another user, it will throw an exception.
+     *
+     * @param user the user to update
+     * @return the updated user entity
+     * @throws ClashingUserException if a user with the same username or email already exists
+     * @throws UserNotFoundException if the user with the specified ID does not exist
+     * @throws IllegalArgumentException if the username, email or password is null or empty
+     * @throws ConstraintViolationException if there are other constraint violations
+     * @throws DataIntegrityViolationException if there is an unknown data integrity violation
+     */
+    User updateUser(User user) throws ClashingUserException, UserNotFoundException;
 
-    @Override
-    @Transactional
-    public User updateUser(User user) throws ClashingUserException, UserNotFoundException, IllegalArgumentException, DataIntegrityViolationException, ConstraintViolationException  {
-        // First, check if the user to update actually exists.
-        User userToUpdate = userRepository.findById(user.getId())
-                .orElseThrow(() -> {
-                    log.warn("User with ID: {} not found for update", user.getId());
-                    return new UserNotFoundException("User with ID: " + user.getId() + " not found for update.");
-                });
+    /**
+     * Patches an existing user in the repository.
+     * This method allows partial updates to a user.
+     * If the user does not exist or the username or email already exists for another user, it will throw an exception.
+     *
+     * @param id the ID of the user to patch
+     * @param patchUserDTO the DTO containing the fields to update
+     * @return the updated user entity
+     * @throws ClashingUserException if a user with the same username or email already exists
+     * @throws UserNotFoundException if the user with the specified ID does not exist
+     * @throws ConstraintViolationException if there are other constraint violations
+     * @throws DataIntegrityViolationException if there is an unknown data integrity violation
+     */
+    User patchUser(Long id, PatchUserDTO patchUserDTO) throws ClashingUserException, UserNotFoundException;
 
-        userToUpdate.setUsername(user.getUsername());
-        userToUpdate.setEmail(user.getEmail());
-        userToUpdate.setPassword(user.getPassword());
-        userToUpdate.setFirstname(user.getFirstname());
-        userToUpdate.setLastname(user.getLastname());
+    /**
+     * Deletes a user by their unique identifier.
+     *
+     * @param id the ID of the user to delete
+     * @throws UserNotFoundException if the user with the specified ID does not exist
+     */
+    void deleteUser(Long id) throws UserNotFoundException;
 
-        log.info("Service - Attempting to update user with ID: {}", user.getId());
-        User updatedUser = null;
-        try {
-            updatedUser = userRepository.save(userToUpdate);
-        } catch (DataIntegrityViolationException e) {
-            // Centralized handling for unique and possibly non-null violations
-            PersistenceExceptionHandler.handleConstraintViolationExceptions(e);
-        }
-        return updatedUser;
-    }
-
-    @Override
-    @Transactional
-    public void deleteUser(Long id) throws UserNotFoundException {
-        if (!userRepository.existsById(id)) {
-            log.warn("User with ID: {} not found for deletion", id);
-            throw new UserNotFoundException("User with ID: " + id + " not found for deletion.");
-        }
-        log.info("Service - Deleting user with ID: {}", id);
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    public long countUsers() {
-        log.info("Counting total number of users in the repository");
-        return userRepository.countUsers();
-    }
-
+    /**
+     * Counts the total number of users in the repository.
+     *
+     * @return the count of users
+     */
+    long countUsers();
 
 }
