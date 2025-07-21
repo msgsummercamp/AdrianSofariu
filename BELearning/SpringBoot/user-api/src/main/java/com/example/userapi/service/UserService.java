@@ -72,7 +72,6 @@ public class UserService implements IUserService {
                     return new UserNotFoundException("User with ID: " + user.getId() + " not found for update.");
                 });
 
-        // Copy relevant fields from the input 'user' to the 'userToUpdate' (fetched from DB)
         userToUpdate.setUsername(user.getUsername());
         userToUpdate.setEmail(user.getEmail());
         userToUpdate.setPassword(user.getPassword());
