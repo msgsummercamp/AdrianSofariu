@@ -1,30 +1,25 @@
 async function fetchDogImage() {
-  try {
-    const response = await fetch("https://dog.ceo/api/breeds/image/random");
-    const data = await response.json();
-    console.log(data);
-    console.log(data.message);
-    return data.message;
-  } catch (error) {
-    alert("Error fetching dog image: " + error.message);
-    console.error("Error fetching dog image:", error);
-  }
+  const response = await fetch("https://dog.ceo/api/breeds/image/random").catch(
+    (error) => {
+      alert("Error fetching dog image: " + error.message);
+    }
+  );
+  return response.json();
 }
 
 function addDisplayDogImageListener() {
-  document.getElementById("loadDog").addEventListener("click", async () => {
-    const dogContainer = document.getElementById("dogContainer");
-    const loading = document.getElementById("loading");
-    const dogImage = document.getElementById("dogImage");
+  document.querySelector(".load-dog-button").addEventListener("click", () => {
+    const dogImage = document.querySelector(".dog-image");
+    const loadingText = document.querySelector(".loading");
 
-    loading.style.display = "block";
-    dogImage.style.display = "none";
+    loadingText.classList.remove("hidden");
+    dogImage.classList.add("hidden");
 
-    const dogUrl = await fetchDogImage();
-    dogImage.src = dogUrl;
-
-    loading.style.display = "none";
-    dogImage.style.display = "block";
+    fetchDogImage().then((response) => {
+      dogImage.src = response.message;
+      loadingText.classList.add("hidden");
+      dogImage.classList.remove("hidden");
+    });
   });
 }
 

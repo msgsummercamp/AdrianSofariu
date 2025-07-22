@@ -23,7 +23,7 @@ main {
   margin-top: 2rem;
 }
 
-button {
+.load-dog-button {
   background-color: #4caf50;
   color: white;
   border: none;
@@ -33,15 +33,19 @@ button {
   border-radius: 5px;
 }
 
-button:hover {
+.load-dog-button:hover {
   background-color: #45a049;
 }
 
-#dogContainer {
+.hidden {
+  display: none;
+}
+
+.dog-container {
   margin-top: 2rem;
 }
 
-#dogImage {
+.dog-image {
   border: 2px solid #ddd;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
