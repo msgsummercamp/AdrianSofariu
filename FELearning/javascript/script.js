@@ -8,9 +8,14 @@ async function fetchDogImage() {
 }
 
 function addDisplayDogImageListener() {
-  document.querySelector(".load-dog-button").addEventListener("click", () => {
+  document.querySelector(".load-dog-button")?.addEventListener("click", () => {
     const dogImage = document.querySelector(".dog-image");
     const loadingText = document.querySelector(".loading");
+
+    if (!dogImage || !loadingText) {
+      alert("DOM elements undefined");
+      return;
+    }
 
     loadingText.classList.remove("hidden");
     dogImage.classList.add("hidden");
