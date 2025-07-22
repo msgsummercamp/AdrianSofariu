@@ -10,22 +10,21 @@ async function fetchDogImage(): Promise<DogApiResponse> {
   return response.json();
 }
 
-async function displayImageOnClick(): Promise<void> {
+function displayImageOnClick(): void {
   const loadDogButton =
     document.querySelector<HTMLButtonElement>(".load-dog-button");
   if (!loadDogButton) {
-    throw new Error("Button not found in the DOM");
+    alert("Missing button in the DOM");
+    return;
   }
 
   const dogImage = document.querySelector<HTMLImageElement>(".dog-image");
   if (!dogImage) {
-    throw new Error("Dog image not found in the DOM");
+    alert("Dog image not found in the DOM");
+    return;
   }
 
   const loadingText = document.querySelector<HTMLParagraphElement>(".loading");
-  if (!loadingText) {
-    throw new Error("Loading text not found in the DOM");
-  }
 
   const errorMessage =
     document.querySelector<HTMLParagraphElement>(".error-message");
@@ -37,18 +36,30 @@ async function displayImageOnClick(): Promise<void> {
   errorMessage.textContent = "";
   errorMessage.classList.add("hidden");
 
-  loadingText.classList.remove("hidden");
+  loadingText?.classList.remove("hidden");
   dogImage.classList.add("hidden");
 
-  try {
-    fetchDogImage().then((response) => {
+  fetchDogImage()
+    .then((response: DogApiResponse) => {
       dogImage.src = response.message;
-      loadingText.classList.add("hidden");
       dogImage.classList.remove("hidden");
+    })
+    .catch((error: Error) => {
+      dogImage.classList.add("hidden");
+      errorMessage.textContent = "Failed to load dog image: " + error;
+      errorMessage.classList.remove("hidden");
+    })
+    .finally(() => {
+      loadingText?.classList.add("hidden");
     });
-  } catch (error) {
-    dogImage.classList.add("hidden");
-    errorMessage.textContent = "Failed to load dog image: " + error;
-    errorMessage.classList.remove("hidden");
-  }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loadDogButton =
+    document.querySelector<HTMLButtonElement>(".load-dog-button");
+  if (loadDogButton) {
+    loadDogButton.addEventListener("click", displayImageOnClick);
+  } else {
+    alert("Load Dog button not found in the DOM");
+  }
+});
