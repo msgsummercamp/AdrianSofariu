@@ -1,0 +1,51 @@
+main {
+  width: 100%;
+  display: flex;
+  min-height: 100%;
+  box-sizing: inherit;
+  position: relative;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+
+  .logo {
+    margin-left: 2dvw;
+    margin-right: 2dvw;
+    font-weight: bold;
+  }
+
+  a[mat-raised-button] {
+    margin-left: 0.5dvh;
+    margin-right: 0.5dvh;
+  }
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.outlet {
+  padding: 5rem;
+}
