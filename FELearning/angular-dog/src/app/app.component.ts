@@ -5,13 +5,12 @@ import { MatToolbar } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [MatToolbar],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
-  title = 'angular-dog';
+  public readonly title = 'angular-dog';
 
   private readonly httpClient: HttpClient = inject(HttpClient);
   private readonly dogUrl: string = 'https://dog.ceo/api/breeds/image/random';

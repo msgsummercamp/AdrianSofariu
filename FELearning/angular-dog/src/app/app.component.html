@@ -10,9 +10,11 @@
       </button>
       @if (loading()) {
       <p>Loading...</p>
-      } @if (imageUrl() && !loading()){
+      } 
+      @if (imageUrl() && !loading()){
       <img class="dog-image" [src]="imageUrl()" alt="Dog Image" />
-      } @if (errorMessage()){
+      } 
+      @if (errorMessage()){
       <p class="error-message">{{ errorMessage() }}</p>
 
       }
