@@ -3,7 +3,6 @@ package com.example.userapi.service;
 import java.util.Optional;
 
 import com.example.userapi.dto.PatchUserDTO;
-import com.example.userapi.dto.UpdateUserDTO;
 import com.example.userapi.dto.UserDTO;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
@@ -76,7 +75,7 @@ public interface UserService {
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
-    User updateUser(UpdateUserDTO user, Long id) throws ClashingUserException, UserNotFoundException;
+    User updateUser(UserDTO user, Long id) throws ClashingUserException, UserNotFoundException;
 
     /**
      * Patches an existing user in the repository.

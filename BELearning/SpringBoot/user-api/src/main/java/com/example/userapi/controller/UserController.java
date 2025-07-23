@@ -90,7 +90,7 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> updateUser(
             @Parameter(description = "ID of the user to update", required = true)
             @PathVariable Long id,
-            @Valid @RequestBody UpdateUserDTO userRequest) throws ClashingUserException, UserNotFoundException {
+            @Valid @RequestBody UserDTO userRequest) throws ClashingUserException, UserNotFoundException {
         User updatedUser = userService.updateUser(userRequest, id);
         UserResponseDTO updatedUserResponse = UserResponseMapper.toUserResponseDTO(updatedUser);
         return ResponseEntity.ok(updatedUserResponse);

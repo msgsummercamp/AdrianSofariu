@@ -1,7 +1,6 @@
 package com.example.userapi.service;
 
 import com.example.userapi.dto.PatchUserDTO;
-import com.example.userapi.dto.UpdateUserDTO;
 import com.example.userapi.dto.UserDTO;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.PersistenceExceptionHandler;
@@ -65,18 +64,8 @@ public class UserServiceImplementation implements UserService {
         User newUser = null;
         try {
 
-            Set<Role> userRoles = user.getRoles().stream()
-                    .map(roleName -> roleRepository.findById(roleName)
-                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
-                    .collect(Collectors.toSet());
-            User userToAdd = User.builder()
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .password(passwordEncoder.encode(user.getPassword()))
-                    .firstname(user.getFirstname())
-                    .lastname(user.getLastname())
-                    .roles(userRoles)
-                    .build();
+            Set<Role> userRoles = getRolesFromDTO(user.getRoles());
+            User userToAdd = fromDTO(user, userRoles);
             logger.info("Service - Attempting to save new user: {}", user.getUsername());
             newUser = userRepository.save(userToAdd);
         } catch (DataIntegrityViolationException e){
@@ -86,22 +75,12 @@ public class UserServiceImplementation implements UserService {
     }
 
     @Override
-    public User updateUser(UpdateUserDTO user, Long id) throws UserNotFoundException, ClashingUserException{
+    public User updateUser(UserDTO user, Long id) throws UserNotFoundException, ClashingUserException{
         User updatedUser = null;
         try {
-            Set<Role> userRoles = user.getRoles().stream()
-                    .map(roleName -> roleRepository.findById(roleName)
-                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
-                    .collect(Collectors.toSet());
-            User updateReqUser = User.builder()
-                    .id(id)
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .password(passwordEncoder.encode(user.getPassword()))
-                    .firstname(user.getFirstname())
-                    .lastname(user.getLastname())
-                    .roles(userRoles)
-                    .build();
+            Set<Role> userRoles = getRolesFromDTO(user.getRoles());
+            User updateReqUser = fromDTO(user, userRoles);
+            updateReqUser.setId(id);
             User userToUpdate = userRepository.findById(id)
                     .orElseThrow(() -> {
                         logger.warn("User with ID: {} not found for update", id);
@@ -185,11 +164,41 @@ public class UserServiceImplementation implements UserService {
         if (patchDTO.getFirstname() != null) target.setFirstname(patchDTO.getFirstname());
         if (patchDTO.getLastname() != null) target.setLastname(patchDTO.getLastname());
         if (patchDTO.getRoles() != null) {
-            Set<Role> userRoles = patchDTO.getRoles().stream()
-                    .map(roleName -> roleRepository.findById(roleName)
-                            .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
-                    .collect(Collectors.toSet());
+            Set<Role> userRoles = getRolesFromDTO(patchDTO.getRoles());
             target.setRoles(userRoles);
         }
+    }
+
+    /**
+     * Converts a set of role names from the DTO to a set of Role entities.
+     *
+     * @param roleNames the set of role names
+     * @return a set of Role entities
+     * @throws IllegalArgumentException if any role name does not exist in the repository
+     */
+    private Set<Role> getRolesFromDTO(Set<String> roleNames) {
+        Set<Role> userRoles = roleNames.stream()
+                .map(roleName -> roleRepository.findById(roleName)
+                        .orElseThrow(() -> new IllegalArgumentException("Role Not Found: " + roleName)))
+                .collect(Collectors.toSet());
+        return userRoles;
+    }
+
+    /**
+     * Converts a UserDTO to a User entity.
+     *
+     * @param userDTO the UserDTO to convert
+     * @param roles the set of roles to associate with the user
+     * @return a User entity
+     */
+    private User fromDTO(UserDTO userDTO, Set<Role> roles) {
+        return User.builder()
+                .username(userDTO.getUsername())
+                .email(userDTO.getEmail())
+                .password(passwordEncoder.encode(userDTO.getPassword()))
+                .firstname(userDTO.getFirstname())
+                .lastname(userDTO.getLastname())
+                .roles(roles)
+                .build();
     }
 }

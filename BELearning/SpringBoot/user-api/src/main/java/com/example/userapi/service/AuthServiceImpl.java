@@ -44,7 +44,6 @@ public class AuthServiceImpl implements AuthService{
     public SignInResponse signIn(SignInRequest signInRequest) throws UserNotFoundException {
         log.info("Signing in user with username: {}", signInRequest.getUsername());
         Optional<User> ouser = userRepository.findByUsername(signInRequest.getUsername());
-                //.orElseThrow(() -> new UserNotFoundException("User not found with username: " + signInRequest.getUsername()));
         if (ouser.isEmpty()) {
             throw new UserNotFoundException("User not found with username: " + signInRequest.getUsername());
         }
