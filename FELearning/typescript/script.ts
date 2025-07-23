@@ -1,4 +1,12 @@
-import { DogApiResponse } from "./types";
+type DogApiResponse = {
+  message: string;
+  status: "success" | "error";
+};
+
+let loadDogButton: HTMLButtonElement | null;
+let dogImage: HTMLImageElement | null;
+let loadingText: HTMLParagraphElement | null;
+let errorMessage: HTMLParagraphElement | null;
 
 async function fetchDogImage(): Promise<DogApiResponse> {
   const response: Response = await fetch(
@@ -11,43 +19,29 @@ async function fetchDogImage(): Promise<DogApiResponse> {
 }
 
 function displayImageOnClick(): void {
-  const loadDogButton =
-    document.querySelector<HTMLButtonElement>(".load-dog-button");
-  if (!loadDogButton) {
-    alert("Missing button in the DOM");
+  if (!loadDogButton || !dogImage || !loadingText || !errorMessage) {
+    alert("Missing DOM elements!");
     return;
   }
 
-  const dogImage = document.querySelector<HTMLImageElement>(".dog-image");
-  if (!dogImage) {
-    alert("Dog image not found in the DOM");
-    return;
-  }
+  const localDogImage = dogImage;
+  const localErrorMessage = errorMessage;
 
-  const loadingText = document.querySelector<HTMLParagraphElement>(".loading");
+  localErrorMessage.textContent = "";
+  localErrorMessage.classList.add("hidden");
 
-  const errorMessage =
-    document.querySelector<HTMLParagraphElement>(".error-message");
-  if (!errorMessage) {
-    alert("Error paragraph missing from DOM, cannot display error.");
-    return;
-  }
-
-  errorMessage.textContent = "";
-  errorMessage.classList.add("hidden");
-
-  loadingText?.classList.remove("hidden");
-  dogImage.classList.add("hidden");
+  loadingText.classList.remove("hidden");
+  localDogImage.classList.add("hidden");
 
   fetchDogImage()
     .then((response: DogApiResponse) => {
-      dogImage.src = response.message;
-      dogImage.classList.remove("hidden");
+      localDogImage.src = response.message;
+      localDogImage.classList.remove("hidden");
     })
     .catch((error: Error) => {
-      dogImage.classList.add("hidden");
-      errorMessage.textContent = "Failed to load dog image: " + error;
-      errorMessage.classList.remove("hidden");
+      localDogImage.classList.add("hidden");
+      localErrorMessage.textContent = "Failed to load dog image: " + error;
+      localErrorMessage.classList.remove("hidden");
     })
     .finally(() => {
       loadingText?.classList.add("hidden");
@@ -55,11 +49,8 @@ function displayImageOnClick(): void {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  const loadDogButton =
-    document.querySelector<HTMLButtonElement>(".load-dog-button");
-  if (loadDogButton) {
-    loadDogButton.addEventListener("click", displayImageOnClick);
-  } else {
-    alert("Load Dog button not found in the DOM");
-  }
+  loadDogButton = document.querySelector<HTMLButtonElement>(".load-dog-button");
+  dogImage = document.querySelector<HTMLImageElement>(".dog-image");
+  loadingText = document.querySelector<HTMLParagraphElement>(".loading");
+  errorMessage = document.querySelector<HTMLParagraphElement>(".error-message");
 });
