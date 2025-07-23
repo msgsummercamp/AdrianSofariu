@@ -1,6 +1,9 @@
 package com.example.userapi.dto;
 
 import com.example.userapi.model.User;
+import com.example.userapi.model.Role;
+
+import java.util.stream.Collectors;
 
 public class UserResponseMapper {
 
@@ -16,6 +19,7 @@ public class UserResponseMapper {
         userResponseDTO.setPassword(user.getPassword());
         userResponseDTO.setFirstname(user.getFirstname());
         userResponseDTO.setLastname(user.getLastname());
+        userResponseDTO.setRoles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
 
         return userResponseDTO;
     }
