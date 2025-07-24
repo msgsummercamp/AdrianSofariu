@@ -57,6 +57,7 @@ main {
 
 .active {
   font-weight: bold;
-  color: #ff4081 !important;
+  --mdc-protected-button-label-text-color: #ff4081;
+  color: #ff4081;
   text-decoration: underline;
 }

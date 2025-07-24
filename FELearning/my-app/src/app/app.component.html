@@ -14,7 +14,15 @@
         >
       </div>
       <div class="right-section">
-        <button mat-icon-button aria-label="Profile" (click)="mockLogin()">
+        <button mat-icon-button aria-label="TryMe" (click)="mockLogin()">
+          <mat-icon>ads_click</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          aria-label="Profile"
+          routerLink="/login"
+          routerLinkActive="active"
+        >
           <mat-icon>account_circle</mat-icon>
         </button>
       </div>
