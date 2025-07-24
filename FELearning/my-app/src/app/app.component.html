@@ -1,0 +1,23 @@
+<main class="main">
+  <div class="content">
+    <mat-toolbar color="primary" class="navbar">
+      <div class="left-section">
+        <span class="logo">My App</span>
+        <a mat-raised-button routerLink="/home">Home</a>
+        <a mat-raised-button routerLink="/about">About</a>
+        <a mat-raised-button href="https://github.com/msgsummerpractice/"
+          >Github</a
+        >
+      </div>
+      <div class="right-section">
+        <button mat-icon-button aria-label="Profile">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+      </div>
+    </mat-toolbar>
+
+    <div class="outlet">
+      <router-outlet />
+    </div>
+  </div>
+</main>
