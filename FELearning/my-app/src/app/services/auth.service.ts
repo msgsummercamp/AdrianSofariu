@@ -24,7 +24,6 @@ export class AuthService {
     let newUsername = '';
     if (this._authState().username === '') newUsername = 'randomUser199';
     this._authState.update((state) => ({
-      ...state,
       isAuthenticated: newAuthState,
       username: newUsername,
     }));

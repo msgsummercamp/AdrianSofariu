@@ -31,6 +31,10 @@
     <app-not-found [authGuard]="isAuthenticated()" />
 
     <div class="outlet">
+      <p [authGuard]="isAuthenticated()" class="greeting">
+        Hello, {{ getUsername() | uppercase }}
+      </p>
+      <p>number 5 becomes {{ 5 | timesfive }}</p>
       <router-outlet />
     </div>
   </div>
