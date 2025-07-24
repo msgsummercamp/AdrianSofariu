@@ -14,7 +14,7 @@
         >
       </div>
       <div class="right-section">
-        <button mat-icon-button aria-label="TryMe" (click)="mockLogin()">
+        <button mat-icon-button aria-label="TryMe" (click)="toggleLogin()">
           <mat-icon>ads_click</mat-icon>
         </button>
         <button
@@ -23,12 +23,12 @@
           routerLink="/login"
           routerLinkActive="active"
         >
-          <mat-icon>account_circle</mat-icon>
+          <mat-icon>login</mat-icon>
         </button>
       </div>
     </mat-toolbar>
 
-    <app-not-found [authGuard]="loggedIn()" />
+    <app-not-found [authGuard]="isAuthenticated()" />
 
     <div class="outlet">
       <router-outlet />
