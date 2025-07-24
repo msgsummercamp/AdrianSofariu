@@ -42,3 +42,12 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Ignore node_modules in any folder or subfolder
+**/node_modules/
+
+# Ignore .angular in any folder or subfolder
+**/.angular/
+
+# Ignore .vscode in any folder or subfolder
+**/.vscode/
