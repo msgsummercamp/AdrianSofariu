@@ -3,6 +3,7 @@ package com.example.userapi.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.util.Set;
 
 @Data
 public class PatchUserDTO {
@@ -14,4 +15,5 @@ public class PatchUserDTO {
     private String password;
     private String firstname;
     private String lastname;
+    private Set<String> roles;
 }

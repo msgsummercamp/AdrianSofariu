@@ -3,6 +3,7 @@ package com.example.userapi.service;
 import java.util.Optional;
 
 import com.example.userapi.dto.PatchUserDTO;
+import com.example.userapi.dto.UserDTO;
 import com.example.userapi.exception.ClashingUserException;
 import com.example.userapi.exception.UserNotFoundException;
 import com.example.userapi.model.User;
@@ -55,25 +56,26 @@ public interface UserService {
      * @param user the user to save
      * @return the saved user entity
      * @throws ClashingUserException if a user with the same username or email already exists
-     * @throws IllegalArgumentException if the username, email or password is null or empty
+     * @throws IllegalArgumentException if the username, email or password is null or empty or role is not valid
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
-    User addUser(User user) throws ClashingUserException;
+    User addUser(UserDTO user) throws ClashingUserException;
 
     /**
      * Updates an existing user in the repository.
      * If the user does not exist or the username or email already exists for another user, it will throw an exception.
      *
      * @param user the user to update
+     * @param id the user id
      * @return the updated user entity
      * @throws ClashingUserException if a user with the same username or email already exists
      * @throws UserNotFoundException if the user with the specified ID does not exist
-     * @throws IllegalArgumentException if the username, email or password is null or empty
+     * @throws IllegalArgumentException if the username, email or password is null or empty or role is not valid
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
      */
-    User updateUser(User user) throws ClashingUserException, UserNotFoundException;
+    User updateUser(UserDTO user, Long id) throws ClashingUserException, UserNotFoundException;
 
     /**
      * Patches an existing user in the repository.
@@ -84,6 +86,7 @@ public interface UserService {
      * @param patchUserDTO the DTO containing the fields to update
      * @return the updated user entity
      * @throws ClashingUserException if a user with the same username or email already exists
+     * @throws IllegalArgumentException if the role ID in the DTO does not exist
      * @throws UserNotFoundException if the user with the specified ID does not exist
      * @throws ConstraintViolationException if there are other constraint violations
      * @throws DataIntegrityViolationException if there is an unknown data integrity violation
