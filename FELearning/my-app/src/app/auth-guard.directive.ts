@@ -1,5 +1,6 @@
 import {
   Directive,
+  effect,
   ElementRef,
   inject,
   input,
@@ -16,8 +17,9 @@ export class AuthGuardDirective {
   public readonly authGuard: InputSignal<boolean> = input.required<boolean>();
 
   constructor() {
-    toObservable(this.authGuard).subscribe((authGuard) => {
-      if (authGuard) {
+    effect(() => {
+      const isAuthenticated = this.authGuard();
+      if (isAuthenticated) {
         this.elementRef.nativeElement.classList.remove('hidden');
       } else {
         this.elementRef.nativeElement.classList.add('hidden');
