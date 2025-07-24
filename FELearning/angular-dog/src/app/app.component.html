@@ -1,0 +1,23 @@
+<main class="main">
+  <div class="content">
+    <mat-toolbar color="primary" class="navbar">
+      <span class="logo"> Random Dog Images </span>
+    </mat-toolbar>
+
+    <div class="display-area">
+      <button class="load-dog-button" (click)="loadDogImage()">
+        Load Random Dog
+      </button>
+      @if (loading()) {
+      <p>Loading...</p>
+      } 
+      @if (imageUrl() && !loading()){
+      <img class="dog-image" [src]="imageUrl()" alt="Dog Image" />
+      } 
+      @if (errorMessage()){
+      <p class="error-message">{{ errorMessage() }}</p>
+
+      }
+    </div>
+  </div>
+</main>
