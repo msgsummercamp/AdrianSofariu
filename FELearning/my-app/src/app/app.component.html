@@ -10,11 +10,13 @@
         >
       </div>
       <div class="right-section">
-        <button mat-icon-button aria-label="Profile">
+        <button mat-icon-button aria-label="Profile" (click)="mockLogin()">
           <mat-icon>account_circle</mat-icon>
         </button>
       </div>
     </mat-toolbar>
+
+    <app-not-found [authGuard]="loggedIn()" />
 
     <div class="outlet">
       <router-outlet />
