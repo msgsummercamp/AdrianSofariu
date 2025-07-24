@@ -54,3 +54,9 @@ main {
 .hidden {
   display: none;
 }
+
+.active {
+  font-weight: bold;
+  color: #ff4081 !important;
+  text-decoration: underline;
+}
