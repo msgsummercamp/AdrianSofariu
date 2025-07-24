@@ -6,7 +6,6 @@ import {
   input,
   InputSignal,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 
 @Directive({
   selector: '[authGuard]',
