@@ -13,7 +13,6 @@ import { MatButtonModule } from '@angular/material/button';
 
 type LoginForm = {
   username: FormControl<string>;
-  email: FormControl<string>;
   password: FormControl<string>;
 };
 
@@ -36,10 +35,6 @@ export class LoginComponent {
   protected readonly loginFormGroup = this._formBuilder.group<LoginForm>({
     username: this._formBuilder.control('', [
       Validators.minLength(5),
-      Validators.required,
-    ]),
-    email: this._formBuilder.control('', [
-      Validators.email,
       Validators.required,
     ]),
     password: this._formBuilder.control('', [
