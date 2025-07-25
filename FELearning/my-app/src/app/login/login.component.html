@@ -1,1 +1,26 @@
-<p>login works!</p>
+<form [formGroup]="loginFormGroup" (ngSubmit)="onFormSubmit()">
+  <label for="username">Username:</label>
+  <input type="text" id="username" formControlName="username" />
+  @if (
+    loginFormGroup.controls.username.hasError("required") &&
+    loginFormGroup.controls.username.dirty
+  ) {
+    <small class="text-error">Username is required.</small>
+  }
+
+  <label for="email">Email:</label>
+  <input type="text" id="email" formControlName="email" />
+  @if (loginFormGroup.controls.email.invalid) {
+    <small class="text-error">Email is required.</small>
+  }
+
+  <label for="password">Password:</label>
+  <input type="password" id="password" formControlName="password" />
+  @if (loginFormGroup.controls.password.invalid) {
+    <small class="text-error">Password is required.</small>
+  }
+
+  <button mat-raised-button type="submit" [disabled]="loginFormGroup.invalid">
+    Log In
+  </button>
+</form>
