@@ -28,15 +28,15 @@ export class AppComponent {
 
   private readonly authService = inject(AuthService);
 
-  public toggleLogin(): void {
-    this.authService.toggleAuthState();
-  }
-
   public isAuthenticated(): boolean {
     return this.authService.isLoggedIn();
   }
 
   public getUsername(): string {
     return this.authService.username();
+  }
+
+  public logOut(): void {
+    this.authService.logOut();
   }
 }

@@ -14,16 +14,22 @@
         >
       </div>
       <div class="right-section">
-        <button mat-icon-button aria-label="TryMe" (click)="toggleLogin()">
-          <mat-icon>ads_click</mat-icon>
-        </button>
         <button
           mat-icon-button
           aria-label="Profile"
           routerLink="/login"
           routerLinkActive="active"
+          [authGuard]="!isAuthenticated()"
         >
           <mat-icon>login</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          aria-label="Logout"
+          (click)="logOut()"
+          [authGuard]="isAuthenticated()"
+        >
+          <mat-icon>logout</mat-icon>
         </button>
       </div>
     </mat-toolbar>
