@@ -1,10 +1,7 @@
 import {
   Directive,
   effect,
-  ElementRef,
   inject,
-  input,
-  InputSignal,
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
