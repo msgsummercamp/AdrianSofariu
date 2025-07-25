@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +15,6 @@ import { NotFoundComponent } from './not-found/not-found.component';
     MatIconModule,
     MatToolbarModule,
     NotFoundComponent,
-    RouterModule,
     RouterOutlet,
   ],
   templateUrl: './app.component.html',
