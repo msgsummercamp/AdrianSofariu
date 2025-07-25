@@ -9,12 +9,12 @@
         <a mat-raised-button routerLink="/about" routerLinkActive="active"
           >About</a
         >
-        <a mat-raised-button href="https://github.com/msgsummerpractice/"
-          >Github</a
+        <a mat-raised-button routerLink="/profile" routerLinkActive="active"
+          >Profile</a
         >
       </div>
       <div class="right-section">
-        <button mat-icon-button aria-label="TryMe" (click)="mockLogin()">
+        <button mat-icon-button aria-label="TryMe" (click)="toggleLogin()">
           <mat-icon>ads_click</mat-icon>
         </button>
         <button
@@ -23,14 +23,15 @@
           routerLink="/login"
           routerLinkActive="active"
         >
-          <mat-icon>account_circle</mat-icon>
+          <mat-icon>login</mat-icon>
         </button>
       </div>
     </mat-toolbar>
 
-    <app-not-found [authGuard]="loggedIn()" />
-
     <div class="outlet">
+      <p *ifAuthenticated class="greeting">
+        Hello, {{ getUsername() | uppercase }}
+      </p>
       <router-outlet />
     </div>
   </div>

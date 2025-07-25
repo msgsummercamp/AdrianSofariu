@@ -1,32 +1,42 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthGuardDirective } from './auth-guard.directive';
-import { NotFoundComponent } from './not-found/not-found.component';
+import { IfAuthenticatedDirective } from './core/auth/directives/auth-guard.directive';
+import { AuthService } from './core/auth/services/auth.service';
+import { UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    AuthGuardDirective,
+    IfAuthenticatedDirective,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    NotFoundComponent,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
+    UpperCasePipe,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
 export class AppComponent {
   public readonly title = 'my-app';
-  public readonly loggedIn = signal<boolean>(false);
 
-  public mockLogin(): void {
-    this.loggedIn.set(!this.loggedIn());
+  private readonly authService = inject(AuthService);
+
+  public toggleLogin(): void {
+    this.authService.toggleAuthState();
+  }
+
+  public isAuthenticated(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  public getUsername(): string {
+    return this.authService.username();
   }
 }
