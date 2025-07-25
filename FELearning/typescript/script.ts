@@ -3,10 +3,12 @@ type DogApiResponse = {
   status: "success" | "error";
 };
 
-let loadDogButton: HTMLButtonElement | null;
-let dogImage: HTMLImageElement | null;
-let loadingText: HTMLParagraphElement | null;
-let errorMessage: HTMLParagraphElement | null;
+const loadDogButton =
+  document.querySelector<HTMLButtonElement>(".load-dog-button");
+const dogImage = document.querySelector<HTMLImageElement>(".dog-image");
+const loadingText = document.querySelector<HTMLParagraphElement>(".loading");
+const errorMessage =
+  document.querySelector<HTMLParagraphElement>(".error-message");
 
 async function fetchDogImage(): Promise<DogApiResponse> {
   const response: Response = await fetch(
@@ -47,10 +49,3 @@ function displayImageOnClick(): void {
       loadingText?.classList.add("hidden");
     });
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadDogButton = document.querySelector<HTMLButtonElement>(".load-dog-button");
-  dogImage = document.querySelector<HTMLImageElement>(".dog-image");
-  loadingText = document.querySelector<HTMLParagraphElement>(".loading");
-  errorMessage = document.querySelector<HTMLParagraphElement>(".error-message");
-});
