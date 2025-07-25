@@ -5,6 +5,7 @@
   justify-content: center;
   margin-top: 2rem;
   font-family: Arial, sans-serif;
+  max-width: 100%;
 
   h1 {
     font-size: 2rem;
@@ -14,6 +15,7 @@
   p {
     font-size: 1.2rem;
     color: #555;
+    word-break: break-all;
 
     strong {
       color: #000;

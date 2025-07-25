@@ -13,4 +13,8 @@ export class ProfileComponent {
   public getUsername(): string {
     return this.authService.username();
   }
+
+  public getToken(): string {
+    return this.authService.authToken();
+  }
 }
