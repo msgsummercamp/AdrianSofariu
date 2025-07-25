@@ -5,19 +5,43 @@
     loginFormGroup.controls.username.hasError("required") &&
     loginFormGroup.controls.username.dirty
   ) {
-    <small class="text-error">Username is required.</small>
+    <small class="text-error">Username cannot be empty.</small>
+  }
+  @if (
+    loginFormGroup.controls.username.hasError("minlength") &&
+    loginFormGroup.controls.username.dirty
+  ) {
+    <small class="text-error">Username must be minimum 5 characters.</small>
   }
 
   <label for="email">Email:</label>
   <input type="text" id="email" formControlName="email" />
-  @if (loginFormGroup.controls.email.invalid) {
+  @if (
+    loginFormGroup.controls.email.hasError("required") &&
+    loginFormGroup.controls.email.dirty
+  ) {
     <small class="text-error">Email is required.</small>
+  }
+  @if (
+    loginFormGroup.controls.email.hasError("email") &&
+    loginFormGroup.controls.email.dirty
+  ) {
+    <small class="text-error">Email is invalid.</small>
   }
 
   <label for="password">Password:</label>
   <input type="password" id="password" formControlName="password" />
-  @if (loginFormGroup.controls.password.invalid) {
-    <small class="text-error">Password is required.</small>
+  @if (
+    loginFormGroup.controls.password.hasError("required") &&
+    loginFormGroup.controls.password.dirty
+  ) {
+    <small class="text-error">Password cannot be empty.</small>
+  }
+  @if (
+    loginFormGroup.controls.password.hasError("minlength") &&
+    loginFormGroup.controls.password.dirty
+  ) {
+    <small class="text-error">Password must be minimum 5 characters.</small>
   }
 
   <button mat-raised-button type="submit" [disabled]="loginFormGroup.invalid">

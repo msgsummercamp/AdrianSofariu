@@ -5,6 +5,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 
 type LoginForm = {
   username: FormControl<string>;
@@ -19,17 +20,31 @@ type LoginForm = {
   styleUrl: './login.component.scss',
 })
 export class LoginComponent {
+  private readonly _authService = inject(AuthService);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
 
   protected readonly loginFormGroup = this._formBuilder.group<LoginForm>({
-    username: this._formBuilder.control('', Validators.minLength(5)),
-    email: this._formBuilder.control('', Validators.email),
-    password: this._formBuilder.control('', Validators.minLength(5)),
+    username: this._formBuilder.control('', [
+      Validators.minLength(5),
+      Validators.required,
+    ]),
+    email: this._formBuilder.control('', [
+      Validators.email,
+      Validators.required,
+    ]),
+    password: this._formBuilder.control('', [
+      Validators.minLength(5),
+      Validators.required,
+    ]),
   });
 
   protected onFormSubmit(): void {
     if (this.loginFormGroup.valid) {
       console.log('Raw values: ', this.loginFormGroup.getRawValue());
+      this._authService.logIn(
+        this.loginFormGroup.controls.username.value,
+        this.loginFormGroup.controls.password.value,
+      );
     }
   }
 }
