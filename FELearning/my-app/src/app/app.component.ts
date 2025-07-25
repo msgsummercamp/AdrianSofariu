@@ -3,8 +3,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { IfAuthenticatedDirective } from './auth-guard.directive';
-import { AuthService } from './services/auth.service';
+import { IfAuthenticatedDirective } from './core/auth/directives/auth-guard.directive';
+import { AuthService } from './core/auth/services/auth.service';
 import { UpperCasePipe } from '@angular/common';
 
 @Component({

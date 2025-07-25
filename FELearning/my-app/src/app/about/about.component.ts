@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TimesfivePipe } from '../pipes/timesfive.pipe';
+import { TimesfivePipe } from '../shared/pipes/timesfive.pipe';
 
 @Component({
   selector: 'app-about',
