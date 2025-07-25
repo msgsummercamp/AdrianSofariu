@@ -35,7 +35,7 @@
     </mat-toolbar>
 
     <div class="outlet">
-      <p [authGuard]="isAuthenticated()" class="greeting">
+      <p *ifAuthenticated class="greeting">
         Hello, {{ getUsername() | uppercase }}
       </p>
       <router-outlet />

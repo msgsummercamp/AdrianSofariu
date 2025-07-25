@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "target": "ES2018", // Or later
-    "module": "ES2015", // Use ES modules
-    "lib": ["ES2018", "DOM"], // Include necessary libraries
-    "strict": true
-  },
-  "include": ["**/*.ts"]
-}

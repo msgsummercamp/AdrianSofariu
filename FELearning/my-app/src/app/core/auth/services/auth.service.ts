@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
-import { AuthState } from '../types/authState';
+import { AuthState } from '../types/auth-state';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { LoginResponse } from '../types/loginResponse';
