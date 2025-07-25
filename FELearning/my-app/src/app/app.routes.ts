@@ -3,7 +3,7 @@ import { HomeComponent } from './features/home/home.component';
 import { AboutComponent } from './features/about/about.component';
 import { LoginComponent } from './features/login/login.component';
 import { NotFoundComponent } from './features/not-found/not-found.component';
-import { ProfileComponent } from './features/profile/profile.component';
+import { UserProfileComponent } from './features/userprofile/user-profile.component';
 import { authenticatedGuard } from './core/auth/guards/authenticated.guard';
 
 export const routes: Routes = [
@@ -13,8 +13,8 @@ export const routes: Routes = [
   {
     path: 'profile',
     loadComponent: () =>
-      import('./features/profile/profile.component').then(
-        (m) => m.ProfileComponent,
+      import('./features/userprofile/user-profile.component').then(
+        (m) => m.UserProfileComponent,
       ),
     canActivate: [authenticatedGuard],
   },

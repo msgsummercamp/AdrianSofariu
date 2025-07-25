@@ -2,12 +2,12 @@ import { Component, inject } from '@angular/core';
 import { AuthService } from '../../core/auth/services/auth.service';
 
 @Component({
-  selector: 'app-profile',
+  selector: 'app-user-profile',
   imports: [],
-  templateUrl: './profile.component.html',
-  styleUrl: './profile.component.scss',
+  templateUrl: './user-profile.component.html',
+  styleUrl: './user-profile.component.scss',
 })
-export class ProfileComponent {
+export class UserProfileComponent {
   private readonly authService = inject(AuthService);
 
   public get username(): string {
