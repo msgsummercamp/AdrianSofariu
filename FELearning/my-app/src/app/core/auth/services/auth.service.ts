@@ -3,6 +3,9 @@ import { AuthState } from '../models/auth-state';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { LoginResponse } from '../models/loginResponse';
+import { CookieService } from 'ngx-cookie-service';
+import { jwtDecode } from 'jwt-decode';
+import { DecodedToken } from '../models/decoded-token';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -21,11 +24,14 @@ export class AuthService {
   private readonly _authState = signal<AuthState>(initialState);
   private readonly _httpClient = inject(HttpClient);
   private readonly _router = inject(Router);
+  private readonly _cookieService = inject(CookieService);
   private readonly API_URL: string = 'http://localhost:8080/api/v1';
 
   constructor() {
-    const savedState = this.loadAuthState();
-    this._authState.set(savedState);
+    const token = this.getTokenFromCookies();
+    if (token) {
+      this.decodeAndSetAuthState(token);
+    }
 
     this.isLoggedIn = computed(() => this._authState().isAuthenticated);
     this.username = computed(() => this._authState().username);
@@ -39,13 +45,8 @@ export class AuthService {
       .post<LoginResponse>(`${this.API_URL}/auth/signin`, payload)
       .subscribe({
         next: (response) => {
-          this._authState.update(() => ({
-            isAuthenticated: true,
-            username: username,
-            token: response.token,
-            roles: response.roles,
-          }));
-          this.saveAuthState(this._authState());
+          this.saveTokenToCookies(response.token);
+          this.decodeAndSetAuthState(response.token);
           this._router.navigate(['/profile']);
         },
         error: (err) => {
@@ -55,6 +56,7 @@ export class AuthService {
   }
 
   public logOut(): void {
+    this.clearTokenFromCookies();
     this._authState.set({
       isAuthenticated: false,
       username: '',
@@ -62,20 +64,39 @@ export class AuthService {
       roles: [],
     });
     console.log('User logged out successfully.');
-    this.clearAuthState();
     this._router.navigate(['/login']);
   }
 
-  private saveAuthState(state: AuthState): void {
-    localStorage.setItem('authState', JSON.stringify(state));
+  private saveTokenToCookies(token: string): void {
+    this._cookieService.set('authToken', token, { path: '/' });
   }
 
-  private loadAuthState(): AuthState {
-    const savedState = localStorage.getItem('authState');
-    return savedState ? JSON.parse(savedState) : initialState;
+  private getTokenFromCookies(): string | null {
+    return this._cookieService.get('authToken') || null;
   }
 
-  private clearAuthState(): void {
-    localStorage.removeItem('authState');
+  private clearTokenFromCookies(): void {
+    this._cookieService.delete('authToken', '/');
+  }
+
+  private decodeAndSetAuthState(token: string): void {
+    try {
+      const decodedToken: DecodedToken = jwtDecode(token);
+      console.log(decodedToken);
+      this._authState.set({
+        isAuthenticated: true,
+        username: decodedToken.sub,
+        token,
+        roles: decodedToken.roles,
+      });
+    } catch (err) {
+      console.error('Failed to decode token:', err);
+      this._authState.set({
+        isAuthenticated: false,
+        username: '',
+        token: '',
+        roles: [],
+      });
+    }
   }
 }
