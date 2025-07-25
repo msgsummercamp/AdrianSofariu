@@ -19,7 +19,7 @@
           aria-label="Profile"
           routerLink="/login"
           routerLinkActive="active"
-          [authGuard]="!isAuthenticated()"
+          *ifNotAuthenticated
         >
           <mat-icon>login</mat-icon>
         </button>
@@ -27,7 +27,7 @@
           mat-icon-button
           aria-label="Logout"
           (click)="logOut()"
-          [authGuard]="isAuthenticated()"
+          *ifAuthenticated
         >
           <mat-icon>logout</mat-icon>
         </button>
