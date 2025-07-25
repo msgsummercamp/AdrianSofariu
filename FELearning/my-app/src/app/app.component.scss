@@ -54,3 +54,10 @@ main {
 .hidden {
   display: none;
 }
+
+.active {
+  font-weight: bold;
+  --mdc-protected-button-label-text-color: #ff4081;
+  color: #ff4081;
+  text-decoration: underline;
+}

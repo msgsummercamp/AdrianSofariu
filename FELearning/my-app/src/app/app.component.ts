@@ -1,22 +1,23 @@
 import { Component, signal } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { NotFoundComponent } from './not-found/not-found.component';
 import { AuthGuardDirective } from './auth-guard.directive';
+import { NotFoundComponent } from './not-found/not-found.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    RouterOutlet,
-    RouterModule,
-    MatButtonModule,
-    MatToolbarModule,
-    MatIconModule,
-    NotFoundComponent,
     AuthGuardDirective,
+    MatButtonModule,
+    MatIconModule,
+    MatToolbarModule,
+    NotFoundComponent,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
