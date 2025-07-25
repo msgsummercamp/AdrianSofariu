@@ -10,7 +10,7 @@ import { AuthService } from '../services/auth.service';
 export class ProfileComponent {
   private readonly authService = inject(AuthService);
 
-  public getUsername(): string {
+  public get username(): string {
     return this.authService.username();
   }
 }

@@ -11,7 +11,7 @@ export const errorInterceptor: HttpInterceptorFn = (
 ) => {
   return next(req).pipe(
     catchError((error) => {
-      console.warn('Some error example');
+      console.error('Some error example');
       return throwError(() => error);
     }),
   );

@@ -5,23 +5,30 @@ import {
   inject,
   input,
   InputSignal,
+  TemplateRef,
+  ViewContainerRef,
 } from '@angular/core';
+import { AuthService } from './services/auth.service';
 
 @Directive({
-  selector: '[authGuard]',
+  selector: '[ifAuthenticated]',
 })
-export class AuthGuardDirective {
-  private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
+export class IfAuthenticatedDirective {
+  private readonly _templateRef = inject(TemplateRef);
+  private readonly _viewContainerRef = inject(ViewContainerRef);
+  private readonly _authService = inject(AuthService);
 
-  public readonly authGuard: InputSignal<boolean> = input.required<boolean>();
+  private _hasView = false;
 
   constructor() {
     effect(() => {
-      const isAuthenticated = this.authGuard();
-      if (isAuthenticated) {
-        this.elementRef.nativeElement.classList.remove('hidden');
+      const isAuthenticated = this._authService.isLoggedIn();
+      if (isAuthenticated && !this._hasView) {
+        this._viewContainerRef.createEmbeddedView(this._templateRef);
+        this._hasView = true;
       } else {
-        this.elementRef.nativeElement.classList.add('hidden');
+        this._viewContainerRef.clear();
+        this._hasView = false;
       }
     });
   }

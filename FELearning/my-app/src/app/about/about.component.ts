@@ -6,6 +6,5 @@ import { TimesfivePipe } from '../pipes/timesfive.pipe';
   standalone: true,
   imports: [TimesfivePipe],
   templateUrl: './about.component.html',
-  providers: [TimesfivePipe],
 })
 export class AboutComponent {}

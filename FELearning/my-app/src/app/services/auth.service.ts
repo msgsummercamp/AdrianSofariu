@@ -1,5 +1,5 @@
 import { computed, Injectable, Signal, signal } from '@angular/core';
-import { AuthState } from '../types/authState';
+import { AuthState } from '../types/auth-state';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -23,18 +23,18 @@ export class AuthService {
   }
 
   public toggleAuthState(): void {
-    const newAuthState = !this._authState().isAuthenticated;
-    let newUsername = '';
-    let newToken = '';
+    const isAuthenticated = !this._authState().isAuthenticated;
+    let username = '';
+    let token = '';
     if (this._authState().username === '') {
-      newUsername = 'randomUser199';
-      newToken = 'dadawd12312edawfgawdawt2e2eh3WDAWg5awd';
+      username = 'randomUser199';
+      token = 'dadawd12312edawfgawdawt2e2eh3WDAWg5awd';
     }
 
     this._authState.update((state) => ({
-      isAuthenticated: newAuthState,
-      username: newUsername,
-      token: newToken,
+      isAuthenticated,
+      username,
+      token,
     }));
   }
 }

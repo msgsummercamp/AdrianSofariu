@@ -3,26 +3,25 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthGuardDirective } from './auth-guard.directive';
+import { IfAuthenticatedDirective } from './auth-guard.directive';
 import { AuthService } from './services/auth.service';
-import { UppercasePipe } from './pipes/uppercase.pipe';
+import { UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    AuthGuardDirective,
+    IfAuthenticatedDirective,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
-    UppercasePipe,
+    UpperCasePipe,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
-  providers: [UppercasePipe],
 })
 export class AppComponent {
   public readonly title = 'my-app';
