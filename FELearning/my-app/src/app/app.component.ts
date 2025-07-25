@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,8 +15,9 @@ import { UppercasePipe } from './pipes/uppercase.pipe';
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    RouterModule,
     RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
     UppercasePipe,
   ],
   templateUrl: './app.component.html',
