@@ -1,50 +1,72 @@
-<form [formGroup]="loginFormGroup" (ngSubmit)="onFormSubmit()">
-  <label for="username">Username:</label>
-  <input type="text" id="username" formControlName="username" />
-  @if (
-    loginFormGroup.controls.username.hasError("required") &&
-    loginFormGroup.controls.username.dirty
-  ) {
-    <small class="text-error">Username cannot be empty.</small>
-  }
-  @if (
-    loginFormGroup.controls.username.hasError("minlength") &&
-    loginFormGroup.controls.username.dirty
-  ) {
-    <small class="text-error">Username must be minimum 5 characters.</small>
-  }
+<div class="login-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Login</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="loginFormGroup" (ngSubmit)="onFormSubmit()">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput type="text" formControlName="username" />
+          @if (
+            loginFormGroup.controls.username.hasError("required") &&
+            loginFormGroup.controls.username.dirty
+          ) {
+            <mat-error>Username cannot be empty.</mat-error>
+          }
+          @if (
+            loginFormGroup.controls.username.hasError("minlength") &&
+            loginFormGroup.controls.username.dirty
+          ) {
+            <mat-error>Username must be at least 5 characters.</mat-error>
+          }
+        </mat-form-field>
 
-  <label for="email">Email:</label>
-  <input type="text" id="email" formControlName="email" />
-  @if (
-    loginFormGroup.controls.email.hasError("required") &&
-    loginFormGroup.controls.email.dirty
-  ) {
-    <small class="text-error">Email is required.</small>
-  }
-  @if (
-    loginFormGroup.controls.email.hasError("email") &&
-    loginFormGroup.controls.email.dirty
-  ) {
-    <small class="text-error">Email is invalid.</small>
-  }
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" />
+          @if (
+            loginFormGroup.controls.email.hasError("required") &&
+            loginFormGroup.controls.email.dirty
+          ) {
+            <mat-error>Email is required.</mat-error>
+          }
+          @if (
+            loginFormGroup.controls.email.hasError("email") &&
+            loginFormGroup.controls.email.dirty
+          ) {
+            <mat-error>Email is invalid.</mat-error>
+          }
+        </mat-form-field>
 
-  <label for="password">Password:</label>
-  <input type="password" id="password" formControlName="password" />
-  @if (
-    loginFormGroup.controls.password.hasError("required") &&
-    loginFormGroup.controls.password.dirty
-  ) {
-    <small class="text-error">Password cannot be empty.</small>
-  }
-  @if (
-    loginFormGroup.controls.password.hasError("minlength") &&
-    loginFormGroup.controls.password.dirty
-  ) {
-    <small class="text-error">Password must be minimum 5 characters.</small>
-  }
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" />
+          @if (
+            loginFormGroup.controls.password.hasError("required") &&
+            loginFormGroup.controls.password.dirty
+          ) {
+            <mat-error>Password cannot be empty.</mat-error>
+          }
+          @if (
+            loginFormGroup.controls.password.hasError("minlength") &&
+            loginFormGroup.controls.password.dirty
+          ) {
+            <mat-error>Password must be at least 5 characters.</mat-error>
+          }
+        </mat-form-field>
 
-  <button mat-raised-button type="submit" [disabled]="loginFormGroup.invalid">
-    Log In
-  </button>
-</form>
+        <div class="button-container">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            [disabled]="loginFormGroup.invalid"
+          >
+            Log In
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
