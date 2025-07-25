@@ -1,8 +1,8 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
-import { AuthState } from '../types/auth-state';
+import { AuthState } from '../models/auth-state';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { LoginResponse } from '../types/loginResponse';
+import { LoginResponse } from '../models/loginResponse';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -24,6 +24,9 @@ export class AuthService {
   private readonly API_URL: string = 'http://localhost:8080/api/v1';
 
   constructor() {
+    const savedState = this.loadAuthState();
+    this._authState.set(savedState);
+
     this.isLoggedIn = computed(() => this._authState().isAuthenticated);
     this.username = computed(() => this._authState().username);
     this.authToken = computed(() => this._authState().token);
@@ -42,6 +45,7 @@ export class AuthService {
             token: response.token,
             roles: response.roles,
           }));
+          this.saveAuthState(this._authState());
           this._router.navigate(['/profile']);
         },
         error: (err) => {
@@ -58,6 +62,20 @@ export class AuthService {
       roles: [],
     });
     console.log('User logged out successfully.');
+    this.clearAuthState();
     this._router.navigate(['/login']);
+  }
+
+  private saveAuthState(state: AuthState): void {
+    localStorage.setItem('authState', JSON.stringify(state));
+  }
+
+  private loadAuthState(): AuthState {
+    const savedState = localStorage.getItem('authState');
+    return savedState ? JSON.parse(savedState) : initialState;
+  }
+
+  private clearAuthState(): void {
+    localStorage.removeItem('authState');
   }
 }
