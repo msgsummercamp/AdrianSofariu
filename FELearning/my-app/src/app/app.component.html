@@ -9,8 +9,8 @@
         <a mat-raised-button routerLink="/about" routerLinkActive="active"
           >About</a
         >
-        <a mat-raised-button href="https://github.com/msgsummerpractice/"
-          >Github</a
+        <a mat-raised-button routerLink="/profile" routerLinkActive="active"
+          >Profile</a
         >
       </div>
       <div class="right-section">
@@ -28,13 +28,10 @@
       </div>
     </mat-toolbar>
 
-    <app-not-found [authGuard]="isAuthenticated()" />
-
     <div class="outlet">
       <p [authGuard]="isAuthenticated()" class="greeting">
         Hello, {{ getUsername() | uppercase }}
       </p>
-      <p>number 5 becomes {{ 5 | timesfive }}</p>
       <router-outlet />
     </div>
   </div>
