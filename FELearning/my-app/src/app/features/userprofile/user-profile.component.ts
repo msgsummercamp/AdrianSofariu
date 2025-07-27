@@ -13,8 +13,4 @@ export class UserProfileComponent {
   public get username(): string {
     return this.authService.username();
   }
-
-  public get token(): string {
-    return this.authService.authToken();
-  }
 }

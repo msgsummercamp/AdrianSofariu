@@ -8,16 +8,10 @@
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Username</mat-label>
           <input matInput type="text" formControlName="username" />
-          @if (
-            loginFormGroup.controls.username.hasError("required") &&
-            loginFormGroup.controls.username.dirty
-          ) {
+          @if (loginFormGroup.controls.username.hasError("required")) {
             <mat-error>Username cannot be empty.</mat-error>
           }
-          @if (
-            loginFormGroup.controls.username.hasError("minlength") &&
-            loginFormGroup.controls.username.dirty
-          ) {
+          @if (loginFormGroup.controls.username.hasError("minlength")) {
             <mat-error>Username must be at least 5 characters.</mat-error>
           }
         </mat-form-field>
@@ -25,16 +19,10 @@
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Password</mat-label>
           <input matInput type="password" formControlName="password" />
-          @if (
-            loginFormGroup.controls.password.hasError("required") &&
-            loginFormGroup.controls.password.dirty
-          ) {
+          @if (loginFormGroup.controls.password.hasError("required")) {
             <mat-error>Password cannot be empty.</mat-error>
           }
-          @if (
-            loginFormGroup.controls.password.hasError("minlength") &&
-            loginFormGroup.controls.password.dirty
-          ) {
+          @if (loginFormGroup.controls.password.hasError("minlength")) {
             <mat-error>Password must be at least 5 characters.</mat-error>
           }
         </mat-form-field>

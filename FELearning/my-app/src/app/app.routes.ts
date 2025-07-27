@@ -5,7 +5,6 @@ import { LoginComponent } from './features/login/login.component';
 import { NotFoundComponent } from './features/not-found/not-found.component';
 import { UserProfileComponent } from './features/userprofile/user-profile.component';
 import { authenticatedGuard } from './core/auth/guards/authenticated.guard';
-import { notAuthenticatedGuard } from './core/auth/guards/not-authenticated.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -18,12 +17,14 @@ export const routes: Routes = [
         (m) => m.UserProfileComponent,
       ),
     canActivate: [authenticatedGuard],
+    data: { requiresAuth: true },
   },
   {
     path: 'login',
     loadComponent: () =>
       import('./features/login/login.component').then((m) => m.LoginComponent),
-    canActivate: [notAuthenticatedGuard],
+    canActivate: [authenticatedGuard],
+    data: { requiresAuth: false },
   },
   { path: '**', component: NotFoundComponent },
 ];

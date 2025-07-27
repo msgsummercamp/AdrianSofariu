@@ -2,25 +2,25 @@ import {
   Directive,
   effect,
   inject,
+  input,
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
-import { AuthService } from '../services/auth.service';
 
 @Directive({
-  selector: '[ifNotAuthenticated]',
+  selector: '[showIfAuthenticated]',
 })
-export class IfNotAuthenticatedDirective {
+export class ShowIfAuthenticatedDirective {
   private readonly _templateRef = inject(TemplateRef);
   private readonly _viewContainerRef = inject(ViewContainerRef);
-  private readonly _authService = inject(AuthService);
 
   private _hasView = false;
+  public showIfAuthenticated = input.required<boolean>();
 
   constructor() {
     effect(() => {
-      const isNotAuthenticated = !this._authService.isLoggedIn();
-      if (isNotAuthenticated && !this._hasView) {
+      const shouldShow = this.showIfAuthenticated();
+      if (shouldShow && !this._hasView) {
         this._viewContainerRef.createEmbeddedView(this._templateRef);
         this._hasView = true;
       } else {

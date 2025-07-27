@@ -6,10 +6,15 @@ import {
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../core/auth/services/auth.service';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
+import { MatCard } from '@angular/material/card';
+import { MatCardContent } from '@angular/material/card';
+import { MatCardHeader } from '@angular/material/card';
+import { MatCardTitle } from '@angular/material/card';
+import { MatError } from '@angular/material/form-field';
+import { MatFormField } from '@angular/material/form-field';
+import { MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 type LoginForm = {
   username: FormControl<string>;
@@ -20,10 +25,15 @@ type LoginForm = {
   selector: 'app-login',
   imports: [
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
+    MatButton,
+    MatCard,
+    MatCardContent,
+    MatCardHeader,
+    MatCardTitle,
+    MatError,
+    MatFormField,
+    MatInput,
+    MatLabel,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -33,23 +43,20 @@ export class LoginComponent {
   private readonly _formBuilder = inject(NonNullableFormBuilder);
 
   protected readonly loginFormGroup = this._formBuilder.group<LoginForm>({
-    username: this._formBuilder.control('', [
-      Validators.minLength(5),
-      Validators.required,
-    ]),
-    password: this._formBuilder.control('', [
-      Validators.minLength(5),
-      Validators.required,
-    ]),
+    username: this._formBuilder.control('', {
+      validators: [Validators.minLength(5), Validators.required],
+      updateOn: 'blur',
+    }),
+    password: this._formBuilder.control('', {
+      validators: [Validators.minLength(5), Validators.required],
+      updateOn: 'blur',
+    }),
   });
 
   protected onFormSubmit(): void {
     if (this.loginFormGroup.valid) {
-      console.log('Raw values: ', this.loginFormGroup.getRawValue());
-      this._authService.logIn(
-        this.loginFormGroup.controls.username.value,
-        this.loginFormGroup.controls.password.value,
-      );
+      const { username, password } = this.loginFormGroup.getRawValue();
+      this._authService.logIn(username, password);
     }
   }
 }

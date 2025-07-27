@@ -6,6 +6,7 @@ import { LoginResponse } from '../models/loginResponse';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
 import { DecodedToken } from '../models/decoded-token';
+import { environment } from '../../../../environments/environment';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -25,13 +26,10 @@ export class AuthService {
   private readonly _httpClient = inject(HttpClient);
   private readonly _router = inject(Router);
   private readonly _cookieService = inject(CookieService);
-  private readonly API_URL: string = 'http://localhost:8080/api/v1';
+  private readonly API_URL: string = environment.API_URL;
 
   constructor() {
-    const token = this.getTokenFromCookies();
-    if (token) {
-      this.decodeAndSetAuthState(token);
-    }
+    this.restoreAuthState();
 
     this.isLoggedIn = computed(() => this._authState().isAuthenticated);
     this.username = computed(() => this._authState().username);
@@ -45,8 +43,9 @@ export class AuthService {
       .post<LoginResponse>(`${this.API_URL}/auth/signin`, payload)
       .subscribe({
         next: (response) => {
-          this.saveTokenToCookies(response.token);
-          this.decodeAndSetAuthState(response.token);
+          const token = response.token;
+          this.saveTokenToSessionStorage(token);
+          this.decodeAndSetAuthState(token);
           this._router.navigate(['/profile']);
         },
         error: (err) => {
@@ -56,33 +55,31 @@ export class AuthService {
   }
 
   public logOut(): void {
-    this.clearTokenFromCookies();
+    this.clearTokenFromSessionStorage();
     this._authState.set({
       isAuthenticated: false,
       username: '',
       token: '',
       roles: [],
     });
-    console.log('User logged out successfully.');
     this._router.navigate(['/login']);
   }
 
-  private saveTokenToCookies(token: string): void {
-    this._cookieService.set('authToken', token, { path: '/' });
+  private saveTokenToSessionStorage(token: string): void {
+    sessionStorage.setItem('authToken', token);
   }
 
-  private getTokenFromCookies(): string | null {
-    return this._cookieService.get('authToken') || null;
+  private getTokenFromSessionStorage(): string | null {
+    return sessionStorage.getItem('authToken');
   }
 
-  private clearTokenFromCookies(): void {
-    this._cookieService.delete('authToken', '/');
+  private clearTokenFromSessionStorage(): void {
+    sessionStorage.removeItem('authToken');
   }
 
   private decodeAndSetAuthState(token: string): void {
     try {
       const decodedToken: DecodedToken = jwtDecode(token);
-      console.log(decodedToken);
       this._authState.set({
         isAuthenticated: true,
         username: decodedToken.sub,
@@ -97,6 +94,13 @@ export class AuthService {
         token: '',
         roles: [],
       });
+    }
+  }
+
+  private restoreAuthState(): void {
+    const token = this.getTokenFromSessionStorage();
+    if (token) {
+      this.decodeAndSetAuthState(token);
     }
   }
 }

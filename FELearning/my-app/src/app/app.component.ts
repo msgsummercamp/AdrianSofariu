@@ -4,16 +4,14 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { IfAuthenticatedDirective } from './core/auth/directives/auth-guard.directive';
+import { ShowIfAuthenticatedDirective } from './core/auth/directives/show-if-auth.directive';
 import { UpperCasePipe } from '@angular/common';
-import { IfNotAuthenticatedDirective } from './core/auth/directives/not-auth.directive';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    IfAuthenticatedDirective,
-    IfNotAuthenticatedDirective,
+    ShowIfAuthenticatedDirective,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,

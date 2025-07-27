@@ -19,7 +19,7 @@
           aria-label="Profile"
           routerLink="/login"
           routerLinkActive="active"
-          *ifNotAuthenticated
+          *showIfAuthenticated="!isAuthenticated()"
         >
           <mat-icon>login</mat-icon>
         </button>
@@ -27,7 +27,7 @@
           mat-icon-button
           aria-label="Logout"
           (click)="logOut()"
-          *ifAuthenticated
+          *showIfAuthenticated="isAuthenticated()"
         >
           <mat-icon>logout</mat-icon>
         </button>
@@ -35,7 +35,7 @@
     </mat-toolbar>
 
     <div class="outlet">
-      <p *ifAuthenticated class="greeting">
+      <p *showIfAuthenticated="isAuthenticated()" class="greeting">
         Hello, {{ getUsername() | uppercase }}
       </p>
       <router-outlet />
