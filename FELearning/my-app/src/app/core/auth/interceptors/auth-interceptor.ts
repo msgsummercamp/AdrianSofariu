@@ -12,6 +12,12 @@ export const authInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn,
 ) => {
   const authToken = inject(AuthService).authToken();
+  const SIGN_IN_URL_MATCHER = '/auth/signin';
+
+  if (req.url.includes(SIGN_IN_URL_MATCHER)) {
+    return next(req);
+  }
+
   const clonedRequest = req.clone({
     setHeaders: {
       Authorization: `Bearer ${authToken}`,

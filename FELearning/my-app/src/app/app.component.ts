@@ -1,17 +1,17 @@
+import { AuthService } from './core/auth/services/auth.service';
 import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
-import { IfAuthenticatedDirective } from './core/auth/directives/auth-guard.directive';
-import { AuthService } from './core/auth/services/auth.service';
+import { ShowIfAuthenticatedDirective } from './core/auth/directives/show-if-auth.directive';
 import { UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    IfAuthenticatedDirective,
+    ShowIfAuthenticatedDirective,
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
@@ -28,15 +28,15 @@ export class AppComponent {
 
   private readonly authService = inject(AuthService);
 
-  public toggleLogin(): void {
-    this.authService.toggleAuthState();
-  }
-
   public isAuthenticated(): boolean {
     return this.authService.isLoggedIn();
   }
 
   public getUsername(): string {
     return this.authService.username();
+  }
+
+  public logOut(): void {
+    this.authService.logOut();
   }
 }
