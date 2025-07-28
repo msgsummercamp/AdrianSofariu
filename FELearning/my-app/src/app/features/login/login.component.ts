@@ -42,16 +42,19 @@ export class LoginComponent {
   private readonly _authService = inject(AuthService);
   private readonly _formBuilder = inject(NonNullableFormBuilder);
 
-  protected readonly loginFormGroup = this._formBuilder.group<LoginForm>({
-    username: this._formBuilder.control('', {
-      validators: [Validators.minLength(5), Validators.required],
+  protected readonly loginFormGroup = this._formBuilder.group<LoginForm>(
+    {
+      username: this._formBuilder.control('', {
+        validators: [Validators.minLength(5), Validators.required],
+      }),
+      password: this._formBuilder.control('', {
+        validators: [Validators.minLength(5), Validators.required],
+      }),
+    },
+    {
       updateOn: 'blur',
-    }),
-    password: this._formBuilder.control('', {
-      validators: [Validators.minLength(5), Validators.required],
-      updateOn: 'blur',
-    }),
-  });
+    },
+  );
 
   protected onFormSubmit(): void {
     if (this.loginFormGroup.valid) {

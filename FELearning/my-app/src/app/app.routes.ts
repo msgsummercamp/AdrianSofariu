@@ -17,14 +17,12 @@ export const routes: Routes = [
         (m) => m.UserProfileComponent,
       ),
     canActivate: [authenticatedGuard],
-    data: { requiresAuth: true },
   },
   {
     path: 'login',
     loadComponent: () =>
       import('./features/login/login.component').then((m) => m.LoginComponent),
     canActivate: [authenticatedGuard],
-    data: { requiresAuth: false },
   },
   { path: '**', component: NotFoundComponent },
 ];
